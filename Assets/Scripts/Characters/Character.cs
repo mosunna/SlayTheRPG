@@ -22,6 +22,7 @@ public class Character : MonoBehaviour
     //Applying damage taken to character
     public virtual void TakeDamage(int damageTaken)
     {
+        int totalDefense = defense + bonusDefense;
         int mitigatedDmg = Mathf.Max(damageTaken - defense, 1); //The character will always take at least 1 damage
         currentHP = Mathf.Max(currentHP - mitigatedDmg, 0); //Prevents health from ever going below 0
     }
@@ -29,17 +30,17 @@ public class Character : MonoBehaviour
     //Applying health restore to character
     public virtual void Heal(int healthResored)
     {
-        currentHP = Mathf.Min(healthResored + currentFP, maxHP);
+        currentHP = Mathf.Min(healthResored + healthResored, maxHP);
     }
 
     //Applying defense to character
     public virtual void Defend(int bonusAmount)
     {
-        bonusDefense +=bonusAmount;
+        bonusDefense += bonusAmount;
     }
 
     //Resetting bonus defense 
-    public virtual void ReseetDefense()
+    public virtual void ResetDefense()
     {
         bonusDefense = 0;
     }
