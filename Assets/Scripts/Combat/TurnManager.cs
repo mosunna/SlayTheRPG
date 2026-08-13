@@ -1,0 +1,113 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TurnManager : MonoBehaviour
+{
+    public BattleState CurrentState; //The state the battle is currently in
+
+    public Player player; //Assigned in the Inspector for now, until spawning exists
+    public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
+
+    private void Start()
+    {
+        SetState(BattleState.START);
+    }
+
+    //Transitions the battle to a new state and logs it
+    public void SetState(BattleState newState)
+    {
+        CurrentState = newState;
+        Debug.Log($"[TurnManager] Entering state: {newState}");
+
+        if (newState == BattleState.START)
+        {
+            HandleStart();
+        }
+        else if (newState == BattleState.SPAWN_ENEMIES)
+        {
+            HandleSpawnEnemies();
+        }
+        else if (newState == BattleState.ENEMIES_CHOOSE_INTENT)
+        {
+            HandleEnemiesChooseIntent();
+        }
+        else if (newState == BattleState.PLAYER_TURN)
+        {
+            HandlePlayerTurn();
+        }
+        else if (newState == BattleState.PLAYER_ACTION)
+        {
+            HandlePlayerAction();
+        }
+        else if (newState == BattleState.ENEMY_TURN)
+        {
+            HandleEnemyTurn();
+        }
+        else if (newState == BattleState.CHECK_WIN_LOSE)
+        {
+            HandleCheckWinLose();
+        }
+    }
+
+    //TODO: the actual battle setup
+    private void HandleStart()
+    {
+        SetState(BattleState.SPAWN_ENEMIES);
+    }
+
+    //TODO: Spawn enemies for this encounter
+    private void HandleSpawnEnemies()
+    {
+        SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+    }
+
+    //TODO: Call ChooseNextIntent() on each enemy
+    private void HandleEnemiesChooseIntent()
+    {
+        SetState(BattleState.PLAYER_TURN);
+    }
+
+    //Resets the player's Defend bonus at the start of their turn, then waits for input
+    private void HandlePlayerTurn()
+    {
+        if(player != null) //Preventing code not compiling in Unity error
+        {
+            player.ResetDefense();
+        }
+
+        //TODO: BattleUI input here
+    }
+
+    //TODO: Act off the player's chosen action (Attack, Skill, Defend)
+    private void HandlePlayerAction()
+    {
+        SetState(BattleState.ENEMY_TURN);
+    }
+
+    //Resets each enemy's Defend bonus at the start of its own turn
+    private void HandleEnemyTurn()
+    {
+        //Resets every enemy at once through the loop
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            enemies[i].ResetDefense();
+        }
+
+        //: Act off each enemy's CurrentIntent in turn order
+        SetState(BattleState.CHECK_WIN_LOSE);
+    }
+
+    //TODO: Check whether the player or all enemies are dead
+    private void HandleCheckWinLose()
+    {
+        SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+    }
+
+    //TEMPORARY: lets you manually step past PLAYER_TURN from the Inspector to
+    //test the full loop before BattleUI exists. Remove once real input exists.
+    [ContextMenu("Debug: Advance To Player Action")]
+    private void DebugAdvanceToPlayerAction()
+    {
+        SetState(BattleState.PLAYER_ACTION);
+    }
+}
