@@ -61,9 +61,14 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
-    //TODO: Call ChooseNextIntent() on each enemy
+    //Calls ChooseNextIntent() on each enemy so their action is decided before the player acts
     private void HandleEnemiesChooseIntent()
     {
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            enemies[i].ChooseNextIntent(player);
+        }
+
         SetState(BattleState.PLAYER_TURN);
     }
 
@@ -103,8 +108,8 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
-    //TEMPORARY: lets you manually step past PLAYER_TURN from the Inspector to
-    //test the full loop before BattleUI exists. Remove once real input exists.
+    //Step past PLAYER_TURN from the Inspector to
+    //test the full loop before BattleUI exists. REMOVE LATER
     [ContextMenu("Debug: Advance To Player Action")]
     private void DebugAdvanceToPlayerAction()
     {

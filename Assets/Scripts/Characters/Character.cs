@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Character : MonoBehaviour
+public abstract class Character : MonoBehaviour
 {
     public string CharacterName;
     public int maxHP;
@@ -23,14 +23,14 @@ public class Character : MonoBehaviour
     public virtual void TakeDamage(int damageTaken)
     {
         int totalDefense = defense + bonusDefense;
-        int mitigatedDmg = Mathf.Max(damageTaken - defense, 1); //The character will always take at least 1 damage
+        int mitigatedDmg = Mathf.Max(damageTaken - totalDefense, 1); //The character will always take at least 1 damage
         currentHP = Mathf.Max(currentHP - mitigatedDmg, 0); //Prevents health from ever going below 0
     }
 
     //Applying health restore to character
     public virtual void Heal(int healthResored)
     {
-        currentHP = Mathf.Min(healthResored + healthResored, maxHP);
+        currentHP = Mathf.Min(currentHP + healthResored, maxHP);
     }
 
     //Applying defense to character
