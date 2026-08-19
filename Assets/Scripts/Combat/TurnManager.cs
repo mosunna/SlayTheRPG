@@ -96,9 +96,9 @@ public class TurnManager : MonoBehaviour
         for(int i = 0; i < enemies.Count; i++)
         {
             enemies[i].ResetDefense();
+            enemies[i].ExecuteIntent();
         }
 
-        //: Act off each enemy's CurrentIntent in turn order
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 

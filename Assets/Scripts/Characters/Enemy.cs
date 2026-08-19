@@ -18,6 +18,18 @@ public class Enemy : Character
     public void ExecuteIntent()
     {
         //If statements on the three possibiltiies of enemy intent (what they plan to do on their turn)
-        //Where if buff is suppose to be executed, it will have different branches depending on the character type casting it
+
+        if(CurrentIntent.type == IntentType.Attack)
+        {
+            CombatActions.Attack(CurrentIntent.target, CurrentIntent.value);
+        }
+        else if(CurrentIntent.type == IntentType.Defend)
+        {
+            CombatActions.Defend(this, CurrentIntent.value);
+        }
+        else if(CurrentIntent.type == IntentType.Buff)
+        {
+            //Where: if buff is suppose to be executed, it will have different branches depending on the character type casting it
+        }
     }
 }
