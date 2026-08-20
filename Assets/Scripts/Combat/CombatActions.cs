@@ -6,7 +6,7 @@ public static class CombatActions
     //from either a the player attacking or a previously chosen enemy attack
     public static void Attack(Character target, int damage)
     {
-        target.TakeDamage(damage);
+        target.TakeDamage(damage);  
     }
 
     //Spends FP and deals the skill's power as damage to the target. Returns false if

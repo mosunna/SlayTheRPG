@@ -83,9 +83,13 @@ public class TurnManager : MonoBehaviour
         //TODO: BattleUI input here
     }
 
-    //TODO: Act off the player's chosen action (Attack, Skill, Defend)
+    //Handles player's chosen actins and then moves to enemy's turn
     private void HandlePlayerAction()
     {
+        if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
+        {
+            CombatActions.Attack(enemies[0], player.attack); //Attack enemies[0] as a test
+        }
         SetState(BattleState.ENEMY_TURN);
     }
 
