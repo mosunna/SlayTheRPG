@@ -99,6 +99,11 @@ public class TurnManager : MonoBehaviour
         //Resets every enemy at once through the loop
         for(int i = 0; i < enemies.Count; i++)
         {
+            if(enemies[i].IsDead() == true)
+            {
+                continue; //Fixes bug that has dead enemies still acting out intents
+            }
+
             enemies[i].ResetDefense();
             enemies[i].ExecuteIntent();
         }
@@ -106,9 +111,34 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
-    //TODO: Check whether the player or all enemies are dead
+    //Handles the check for whether the player or all enemies are dead
     private void HandleCheckWinLose()
     {
+        if(player != null && player.IsDead())
+        {
+            SetState(BattleState.DEFEAT);
+            return;
+        }
+
+        bool allEnemiesDead = true;
+
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            if(enemies[i].IsDead() == false)
+            {
+                allEnemiesDead = false;
+                break;
+                
+            }
+
+        }
+
+        if(allEnemiesDead && enemies.Count > 0)
+        {
+            SetState(BattleState.VICTORY);
+            return;
+        }
+        
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
