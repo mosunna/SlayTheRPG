@@ -151,10 +151,10 @@ MonoBehaviour:
   CharacterName: Momo
   maxHP: 10
   currentHP: 10
-  attack: 1
-  defense: 1
-  maxFP: 1
-  currentFP: 1
+  attack: 5
+  defense: 2
+  maxFP: 10
+  currentFP: 10
 --- !u!4 &252444613
 Transform:
   m_ObjectHideFlags: 0
@@ -435,6 +435,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1020495834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1020495836}
+  - component: {fileID: 1020495835}
+  m_Layer: 0
+  m_Name: Enemy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1020495835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020495834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7a2adb730be0d84da2a532c6ab59fb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  CharacterName: Slime
+  maxHP: 10
+  currentHP: 10
+  attack: 5
+  defense: 2
+  maxFP: 10
+  currentFP: 10
+  sourceData: {fileID: 0}
+--- !u!4 &1020495836
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020495834}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1726067335
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +518,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TurnManager
   CurrentState: 0
   player: {fileID: 252444612}
-  enemies: []
+  enemies:
+  - {fileID: 1020495835}
 --- !u!4 &1726067337
 Transform:
   m_ObjectHideFlags: 0
@@ -491,3 +544,4 @@ SceneRoots:
   - {fileID: 361117276}
   - {fileID: 1726067337}
   - {fileID: 252444613}
+  - {fileID: 1020495836}

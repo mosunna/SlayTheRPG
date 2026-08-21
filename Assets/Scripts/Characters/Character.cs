@@ -12,6 +12,13 @@ public abstract class Character : MonoBehaviour
     public int currentFP;
     
     private int bonusDefense = 0; //The bonus defense a character gains when using block on their turn
+    private int bonusAttack = 0; //Temporary attack bonus from an attack buff being cast
+    private int buffTurnsRemaining = 0; //Turn duration left on current buff before it is removed from character
+
+    public int EffectiveAttack
+    {
+        get {return attack + bonusAttack;}
+    }
 
     //Checks if character is dead
     public bool IsDead()
@@ -43,6 +50,29 @@ public abstract class Character : MonoBehaviour
     public virtual void ResetDefense()
     {
         bonusDefense = 0;
+    }
+
+    //Applies a buff to character. Stacks onto existing duration (if any)
+    public virtual void ApplyBuff(int bonusAmount)
+    {
+        bonusAttack = bonusAmount;
+        buffTurnsRemaining  += 2;
+    }
+
+    //Ages the buff by one turn phase, and removing it once its duration is over
+    public virtual void BuffDecay()
+    {
+        if(buffTurnsRemaining <= 0)
+        {
+            return;
+        }
+
+        buffTurnsRemaining--;
+
+        if(buffTurnsRemaining <= 0)
+        {
+            bonusAttack = 0;
+        }
     }
 
 }

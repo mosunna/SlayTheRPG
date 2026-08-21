@@ -28,4 +28,9 @@ public static class CombatActions
     {
         character.Defend(bonusAmount);
     }
+
+    public static int RollDamage(int baseAttack)
+    {
+        return Random.Range(baseAttack - 1, baseAttack + 2);
+    }
 }

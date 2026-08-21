@@ -9,9 +9,24 @@ public class Enemy : Character
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
     public void ChooseNextIntent(Character target)
     {
-        //TODO: branch on enemy type once more than an acttack only behavior exists
+        int rolledDamage = CombatActions.RollDamage(EffectiveAttack);
+
+        int maxHits;
+
+        if(sourceData != null)
+        {
+            maxHits = sourceData.maxHits;
+        }
+        else
+        {
+            maxHits = 1;
+        }
+
+        int hits = Random.Range(1, maxHits + 1); 
+
         //TODO: assign a real icon once the IntentIcon system exists in Phase 3
-        CurrentIntent = new Intent(IntentType.Attack, attack, target, null);
+        CurrentIntent = new Intent(IntentType.Attack, rolledDamage, hits, target, null);
+
     }
 
     //Executes the enemy's current intention, decisin will be applied through CombatActions
@@ -21,7 +36,12 @@ public class Enemy : Character
 
         if(CurrentIntent.type == IntentType.Attack)
         {
-            CombatActions.Attack(CurrentIntent.target, CurrentIntent.value);
+           int hits = Mathf.Max(CurrentIntent.hitCount, 1);
+
+           for(int i = 0; i < hits; i++)
+            {
+                CombatActions.Attack(CurrentIntent.target, CurrentIntent.value);
+            }
         }
         else if(CurrentIntent.type == IntentType.Defend)
         {

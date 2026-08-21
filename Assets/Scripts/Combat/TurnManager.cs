@@ -88,7 +88,8 @@ public class TurnManager : MonoBehaviour
     {
         if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
         {
-            CombatActions.Attack(enemies[0], player.attack); //Attack enemies[0] as a test
+            int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
+            CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
         }
         SetState(BattleState.ENEMY_TURN);
     }
@@ -106,6 +107,12 @@ public class TurnManager : MonoBehaviour
 
             enemies[i].ResetDefense();
             enemies[i].ExecuteIntent();
+        }
+
+        //Decreases every enemy's buff by one turn asfter their action is processed
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            enemies[i].BuffDecay();
         }
 
         SetState(BattleState.CHECK_WIN_LOSE);
