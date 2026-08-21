@@ -61,9 +61,14 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
-    //TODO: Call ChooseNextIntent() on each enemy
+    //Calls ChooseNextIntent() on each enemy so their action is decided before the player acts
     private void HandleEnemiesChooseIntent()
     {
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            enemies[i].ChooseNextIntent(player);
+        }
+
         SetState(BattleState.PLAYER_TURN);
     }
 
@@ -78,9 +83,14 @@ public class TurnManager : MonoBehaviour
         //TODO: BattleUI input here
     }
 
-    //TODO: Act off the player's chosen action (Attack, Skill, Defend)
+    //Handles player's chosen actins and then moves to enemy's turn
     private void HandlePlayerAction()
     {
+        if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
+        {
+            int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
+            CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
+        }
         SetState(BattleState.ENEMY_TURN);
     }
 
@@ -90,21 +100,57 @@ public class TurnManager : MonoBehaviour
         //Resets every enemy at once through the loop
         for(int i = 0; i < enemies.Count; i++)
         {
+            if(enemies[i].IsDead() == true)
+            {
+                continue; //Fixes bug that has dead enemies still acting out intents
+            }
+
             enemies[i].ResetDefense();
+            enemies[i].ExecuteIntent();
         }
 
-        //: Act off each enemy's CurrentIntent in turn order
+        //Decreases every enemy's buff by one turn asfter their action is processed
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            enemies[i].BuffDecay();
+        }
+
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
-    //TODO: Check whether the player or all enemies are dead
+    //Handles the check for whether the player or all enemies are dead
     private void HandleCheckWinLose()
     {
+        if(player != null && player.IsDead())
+        {
+            SetState(BattleState.DEFEAT);
+            return;
+        }
+
+        bool allEnemiesDead = true;
+
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            if(enemies[i].IsDead() == false)
+            {
+                allEnemiesDead = false;
+                break;
+                
+            }
+
+        }
+
+        if(allEnemiesDead && enemies.Count > 0)
+        {
+            SetState(BattleState.VICTORY);
+            return;
+        }
+        
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
-    //TEMPORARY: lets you manually step past PLAYER_TURN from the Inspector to
-    //test the full loop before BattleUI exists. Remove once real input exists.
+    //Step past PLAYER_TURN from the Inspector to
+    //test the full loop before BattleUI exists. REMOVE LATER
     [ContextMenu("Debug: Advance To Player Action")]
     private void DebugAdvanceToPlayerAction()
     {
