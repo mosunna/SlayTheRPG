@@ -6,6 +6,8 @@ public class Enemy : Character
 
     public Intent CurrentIntent; //Set by ChooseNextIntent() during ENEMIES_CHOOSE_INTENT, read during ENEMY_TURN
 
+    private SpriteRenderer spriteRenderer;
+
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
     public void ChooseNextIntent(Character target)
     {
@@ -51,5 +53,25 @@ public class Enemy : Character
         {
             //Where: if buff is suppose to be executed, it will have different branches depending on the character type casting it
         }
+    }
+
+    private void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if(sourceData != null)
+        {
+            InitalizeFromSourceData();
+        }
+    }
+
+    //Copies this enemy's stats from its EnemyData asset into the runtime fields (so i don't have to manually add in stats)
+    private void InitalizeFromSourceData()
+    {
+        CharacterName = sourceData.enemyName;
+        maxHP = sourceData.maxHP;
+        currentHP = sourceData.maxHP;
+        attack = sourceData.attack;
+        defense = sourceData.defense;
+        spriteRenderer.sprite = sourceData.sprite;
     }
 }
