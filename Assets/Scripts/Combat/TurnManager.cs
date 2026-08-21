@@ -8,6 +8,17 @@ public class TurnManager : MonoBehaviour
     public Player player; //Assigned in the Inspector for now, until spawning exists
     public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
 
+    //Player will select an option from the battle menu. Heal and Charge will be categorized under Spell
+    private enum PlayerActionType
+    {
+        Attack, 
+        Defend,
+        Heal,
+        Charge
+    }
+    
+    private PlayerActionType pendingPlayerAction; // Which action was selected from UI buttons
+
     private void Start()
     {
         SetState(BattleState.START);
@@ -46,6 +57,46 @@ public class TurnManager : MonoBehaviour
         else if (newState == BattleState.CHECK_WIN_LOSE)
         {
             HandleCheckWinLose();
+        }
+    }
+
+    //Called by the Attack button's OnClick()
+    public void OnAttackButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Attack;
+            SetState(BattleState.PLAYER_ACTION);
+        }
+    }
+
+    //Called by the Defend button's OnClick()
+    public void OnDefendButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Defend;
+            SetState(BattleState.PLAYER_ACTION);
+        }
+    }
+
+    //Called by the Heal button's OnClick(), inside the Spell submenu
+    public void OnHealButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Heal;
+            SetState(BattleState.PLAYER_ACTION);
+        }
+    }
+
+    //Called by the Charge button's OnClick(), inside the Spell submenu
+    public void OnChargeButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Charge;
+            SetState(BattleState.PLAYER_ACTION);
         }
     }
 
@@ -88,8 +139,23 @@ public class TurnManager : MonoBehaviour
     {
         if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
         {
-            int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
-            CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
+            if(pendingPlayerAction == PlayerActionType.Attack)
+            {
+                int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
+                CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
+            }
+            else if(pendingPlayerAction == PlayerActionType.Defend)
+            {
+                CombatActions.Defend(player, 3); //Placeholder bonus amount - tune once playtested
+            }
+            else if(pendingPlayerAction == PlayerActionType.Heal)
+            {
+                //Implement once Heal's SkillData design is worked out
+            }
+            else if(pendingPlayerAction == PlayerActionType.Charge)
+            {
+                //Implement once Charge's delayed double damage mechanic is designed
+            }
         }
         SetState(BattleState.ENEMY_TURN);
     }
