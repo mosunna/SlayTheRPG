@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TurnManager : MonoBehaviour
@@ -60,13 +61,14 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    private bool awaitingTarget = false; //Whether or not the game is waiting for you to select a target
     //Called by the Attack button's OnClick()
     public void OnAttackButtonPressed()
     {
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Attack;
-            SetState(BattleState.PLAYER_ACTION);
+            awaitingTarget = true; //WAITS FOR PLAYER TO SELECT TARGET ENEMY
         }
     }
 
@@ -76,6 +78,7 @@ public class TurnManager : MonoBehaviour
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Defend;
+            awaitingTarget = false;
             SetState(BattleState.PLAYER_ACTION);
         }
     }
@@ -86,6 +89,7 @@ public class TurnManager : MonoBehaviour
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Heal;
+            awaitingTarget = false;
             SetState(BattleState.PLAYER_ACTION);
         }
     }
@@ -96,6 +100,7 @@ public class TurnManager : MonoBehaviour
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Charge;
+            awaitingTarget = false;
             SetState(BattleState.PLAYER_ACTION);
         }
     }
@@ -139,10 +144,12 @@ public class TurnManager : MonoBehaviour
     {
         if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
         {
+            EnsureValidTarget();
+
             if(pendingPlayerAction == PlayerActionType.Attack)
             {
                 int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
-                CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
+                CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING 
             }
             else if(pendingPlayerAction == PlayerActionType.Defend)
             {
@@ -213,6 +220,43 @@ public class TurnManager : MonoBehaviour
         }
         
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+    }
+
+    private Enemy selectedTarget; //Which enemy is currently chosen as an attack target
+
+    //Called by an Enemy's OnMouseDown() when the player clicks it
+    public void SelectTarget(Enemy enemy)
+    {
+        if(enemy == null || enemy.IsDead())
+        {
+            return;
+        }
+
+        selectedTarget = enemy;
+
+        if(awaitingTarget == true && CurrentState == BattleState.PLAYER_TURN)
+        {
+            awaitingTarget = false;
+            SetState(BattleState.PLAYER_ACTION); //The click itself is what triggers the attack to resolve
+        }
+    }
+
+    //Ensures selectedTarget always points at a valid, living enemy before it's used
+    private void EnsureValidTarget()
+    {
+        if(selectedTarget != null && selectedTarget.IsDead() == false)
+        {
+            return;
+        }
+
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            if(enemies[i].IsDead() == false)
+            {
+                selectedTarget = enemies[i];
+                return;
+            }
+        }
     }
 
     //Step past PLAYER_TURN from the Inspector to

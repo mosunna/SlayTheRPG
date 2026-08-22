@@ -55,6 +55,7 @@ public class Enemy : Character
         }
     }
 
+    //A built in Unity method
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -73,5 +74,21 @@ public class Enemy : Character
         attack = sourceData.attack;
         defense = sourceData.defense;
         spriteRenderer.sprite = sourceData.sprite;
+    }
+
+    private TurnManager turnManager;
+
+    private void Start()
+    {
+        turnManager = FindAnyObjectByType<TurnManager>();
+    }
+
+    //A built in Unity method. Just activates when mouse clicked on in gameobjects
+    private void OnMouseDown()
+    {
+        if(turnManager != null)
+        {
+            turnManager.SelectTarget(this);
+        }
     }
 }
