@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class TurnManager : MonoBehaviour
 
     public Player player; //Assigned in the Inspector for now, until spawning exists
     public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
+    public TMP_Text playerHPText;
 
     //Player will select an option from the battle menu. Heal and Charge will be categorized under Spell
     private enum PlayerActionType
@@ -23,6 +25,14 @@ public class TurnManager : MonoBehaviour
     private void Start()
     {
         SetState(BattleState.START);
+    }
+
+    private void Update()
+    {
+        if(player != null)
+        {
+            playerHPText.text = $"{player.currentHP}/{player.maxHP}";
+        }
     }
 
     //Transitions the battle to a new state and logs it

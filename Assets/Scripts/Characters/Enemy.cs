@@ -1,4 +1,6 @@
+using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : Character
 {
@@ -7,6 +9,9 @@ public class Enemy : Character
     public Intent CurrentIntent; //Set by ChooseNextIntent() during ENEMIES_CHOOSE_INTENT, read during ENEMY_TURN
 
     private SpriteRenderer spriteRenderer;
+
+    public UnityEngine.UI.Image hpBarFill;
+    public TMPro.TMP_Text hpNumberText;
 
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
     public void ChooseNextIntent(Character target)
@@ -62,6 +67,19 @@ public class Enemy : Character
         if(sourceData != null)
         {
             InitalizeFromSourceData();
+        }
+    }
+
+    private void Update()
+    {
+        if(hpBarFill != null)
+        {
+            hpBarFill.fillAmount = (float)currentHP / maxHP; //WIthout float typecast, this doesn't work
+        }
+
+        if(hpNumberText != null)
+        {
+            hpNumberText.text = $"{currentHP}/{maxHP}";
         }
     }
 
