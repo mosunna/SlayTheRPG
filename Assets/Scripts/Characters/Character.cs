@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public abstract class Character : MonoBehaviour
@@ -10,10 +11,17 @@ public abstract class Character : MonoBehaviour
     public int defense;
     public int maxFP;
     public int currentFP;
-    
+
     private int bonusDefense = 0; //The bonus defense a character gains when using block on their turn
     private int bonusAttack = 0; //Temporary attack bonus from an attack buff being cast
     private int buffTurnsRemaining = 0; //Turn duration left on current buff before it is removed from character
+
+    private const float HPBarTweenDuration = 0.8f; //How long the main bar takes to animate to a new HP value
+
+    private float displayedHP; //The HP value the main bar is currently showing/animating toward
+    private bool displayedHPInitialized = false;
+    private Coroutine hpBarCoroutine;
+    private int lastObservedHP; //The currentHP value the tween last reacted to, so mid-tween frames don't restart it
 
     public int EffectiveAttack
     {
@@ -46,7 +54,7 @@ public abstract class Character : MonoBehaviour
         bonusDefense += bonusAmount;
     }
 
-    //Resetting bonus defense 
+    //Resetting bonus defense
     public virtual void ResetDefense()
     {
         bonusDefense = 0;
@@ -75,15 +83,83 @@ public abstract class Character : MonoBehaviour
         }
     }
 
-}
-/*
-public class Player : Character
-{
-    
-}
+    //Call this every frame (from a subclass's Update()) to drive a main HP bar, a trailing "ghost" bar,
+    //and an HP number text. mainBarFill animates smoothly toward currentHP. ghostBarFill stays frozen at
+    //the pre-damage value for the duration of the animation, then snaps down to match once it finishes.
+    //Any of the three parameters can be left null if that piece of UI doesn't exist for this character.
+    protected void UpdateHPDisplay(UnityEngine.UI.Image mainBarFill, UnityEngine.UI.Image ghostBarFill, TMPro.TMP_Text hpNumberText)
+    {
+        if(displayedHPInitialized == false)
+        {
+            displayedHP = currentHP;
+            lastObservedHP = currentHP;
+            displayedHPInitialized = true;
 
-public class Enemy : Character
-{
-    
+            if(ghostBarFill != null)
+            {
+                ghostBarFill.fillAmount = (float)currentHP / Mathf.Max(maxHP, 1);
+            }
+        }
+
+        //Only react when currentHP actually changes (a new hit/heal), not every frame a tween is still mid-flight -
+        //otherwise this would restart the coroutine every frame and it would never reach its final step
+        if(currentHP != lastObservedHP)
+        {
+            lastObservedHP = currentHP;
+
+            if(hpBarCoroutine != null)
+            {
+                StopCoroutine(hpBarCoroutine);
+            }
+
+            hpBarCoroutine = StartCoroutine(AnimateHPBar(mainBarFill, ghostBarFill));
+        }
+
+        if(mainBarFill != null)
+        {
+            mainBarFill.fillAmount = displayedHP / Mathf.Max(maxHP, 1);
+        }
+
+        if(hpNumberText != null)
+        {
+            hpNumberText.text = $"{currentHP}/{maxHP}";
+        }
+    }
+
+    //Animates displayedHP from its current value toward currentHP over HPBarTweenDuration seconds.
+    //ghostBarFill is left untouched (still showing the old value) until the animation finishes, then snaps to match.
+    private IEnumerator AnimateHPBar(UnityEngine.UI.Image mainBarFill, UnityEngine.UI.Image ghostBarFill)
+    {
+        float startValue = displayedHP;
+        float endValue = currentHP;
+        float elapsed = 0f;
+
+        while(elapsed < HPBarTweenDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / HPBarTweenDuration;
+            float easedT = 1f - Mathf.Pow(1f - t, 3f); //Cubic ease-out: fast at first, slows into a crawl near the end
+            displayedHP = Mathf.Lerp(startValue, endValue, easedT);
+
+            if(mainBarFill != null)
+            {
+                mainBarFill.fillAmount = displayedHP / Mathf.Max(maxHP, 1);
+            }
+
+            yield return null;
+        }
+
+        displayedHP = endValue;
+
+        if(mainBarFill != null)
+        {
+            mainBarFill.fillAmount = displayedHP / Mathf.Max(maxHP, 1);
+        }
+
+        if(ghostBarFill != null)
+        {
+            ghostBarFill.fillAmount = (float)currentHP / Mathf.Max(maxHP, 1);
+        }
+    }
+
 }
-*/

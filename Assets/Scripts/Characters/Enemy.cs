@@ -1,4 +1,3 @@
-using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +10,7 @@ public class Enemy : Character
     private SpriteRenderer spriteRenderer;
 
     public UnityEngine.UI.Image hpBarFill;
+    public UnityEngine.UI.Image hpBarGhostFill;
     public TMPro.TMP_Text hpNumberText;
 
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
@@ -72,15 +72,7 @@ public class Enemy : Character
 
     private void Update()
     {
-        if(hpBarFill != null)
-        {
-            hpBarFill.fillAmount = (float)currentHP / maxHP; //WIthout float typecast, this doesn't work
-        }
-
-        if(hpNumberText != null)
-        {
-            hpNumberText.text = $"{currentHP}/{maxHP}";
-        }
+        UpdateHPDisplay(hpBarFill, hpBarGhostFill, hpNumberText);
     }
 
     //Copies this enemy's stats from its EnemyData asset into the runtime fields (so i don't have to manually add in stats)
