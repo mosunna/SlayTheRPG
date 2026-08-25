@@ -7,7 +7,7 @@ public class Enemy : Character
 
     public Intent CurrentIntent; //Set by ChooseNextIntent() during ENEMIES_CHOOSE_INTENT, read during ENEMY_TURN
 
-    private SpriteRenderer spriteRenderer;
+    //private SpriteRenderer spriteRenderer;
 
     public UnityEngine.UI.Image hpBarFill;
     public UnityEngine.UI.Image hpBarGhostFill;
@@ -66,7 +66,7 @@ public class Enemy : Character
         spriteRenderer = GetComponent<SpriteRenderer>();
         if(sourceData != null)
         {
-            InitalizeFromSourceData();
+            InitializeFromSourceData();
         }
     }
 
@@ -76,7 +76,7 @@ public class Enemy : Character
     }
 
     //Copies this enemy's stats from its EnemyData asset into the runtime fields (so i don't have to manually add in stats)
-    private void InitalizeFromSourceData()
+    public void InitializeFromSourceData()
     {
         CharacterName = sourceData.enemyName;
         maxHP = sourceData.maxHP;

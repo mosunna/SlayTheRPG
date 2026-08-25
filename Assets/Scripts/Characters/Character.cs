@@ -23,6 +23,11 @@ public abstract class Character : MonoBehaviour
     private Coroutine hpBarCoroutine;
     private int lastObservedHP; //The currentHP value the tween last reacted to, so mid-tween frames don't restart it
 
+    public SpriteRenderer spriteRenderer;
+    private const float DamageFlashDuration = 0.3f;
+    private const int DamageFlashBlinkCount = 3;
+    private Coroutine damageFlashCoroutine;
+
     public int EffectiveAttack
     {
         get {return attack + bonusAttack;}
@@ -40,6 +45,32 @@ public abstract class Character : MonoBehaviour
         int totalDefense = defense + bonusDefense;
         int mitigatedDmg = Mathf.Max(damageTaken - totalDefense, 1); //The character will always take at least 1 damage
         currentHP = Mathf.Max(currentHP - mitigatedDmg, 0); //Prevents health from ever going below 0
+
+        PlayDamageFlash();
+    }
+
+    private void PlayDamageFlash()
+    {
+        if(spriteRenderer == null) //Currently player is a null sprite, so this fixes null error
+        {
+            return;
+        }
+
+        damageFlashCoroutine = StartCoroutine(DamageFlashRoutine());
+    }
+
+    private IEnumerator DamageFlashRoutine()
+    {
+        float blinkDuration = DamageFlashDuration / (DamageFlashBlinkCount * 2);
+
+        for(int i =0; i < DamageFlashBlinkCount; i++)
+        {
+            spriteRenderer.enabled = false;
+            yield return new WaitForSeconds(blinkDuration);
+
+            spriteRenderer.enabled = true;
+            yield return new WaitForSeconds(blinkDuration);
+        }
     }
 
     //Applying health restore to character

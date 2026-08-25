@@ -8,6 +8,36 @@ public class TurnManager : MonoBehaviour
     public Player player; //Assigned in the Inspector for now, until spawning exists
     public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
 
+    public GameObject enemyPrefab;
+    public Transform spawnPointLeft;
+    public Transform spawnPointCenter;
+    public Transform spawnPointRight;
+    public EncounterData currentEncounter; //Hardcoded for now
+
+    //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
+    private List<Transform> GetSpawnFormation(int enemyCount)
+    {
+        List<Transform> points = new List<Transform>(); //The list storing the game space location of the enemies
+
+        if(enemyCount == 1)
+        {
+            points.Add(spawnPointCenter);
+        }
+        else if(enemyCount == 2)
+        {
+            points.Add(spawnPointLeft);
+            points.Add(spawnPointRight);
+        }
+        else if(enemyCount == 3)
+        {
+            points.Add(spawnPointLeft);
+            points.Add(spawnPointCenter);
+            points.Add(spawnPointRight);
+        }
+
+        return points;
+    }
+
     //Player will select an option from the battle menu. Heal and Charge will be categorized under Spell
     private enum PlayerActionType
     {
@@ -113,6 +143,27 @@ public class TurnManager : MonoBehaviour
     //TODO: Spawn enemies for this encounter
     private void HandleSpawnEnemies()
     {
+        if(currentEncounter != null && enemyPrefab != null)
+        {
+            List<Transform> formation = GetSpawnFormation(currentEncounter.enemies.Count);
+            for(int i = 0; i < currentEncounter.enemies.Count; i++)
+            {
+                if(i >= formation.Count)
+                {
+                    break;
+                }
+
+                GameObject newEnemyObject = Instantiate(enemyPrefab,formation[i].position, Quaternion.identity);
+                Enemy newEnemy = newEnemyObject.GetComponent<Enemy>();
+
+                if(newEnemy != null)
+                {
+                    newEnemy.sourceData = currentEncounter.enemies[i];
+                    newEnemy.InitializeFromSourceData();
+                    enemies.Add(newEnemy);
+                }
+            }
+        }
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
