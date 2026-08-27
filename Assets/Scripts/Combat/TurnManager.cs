@@ -11,9 +11,12 @@ public class TurnManager : MonoBehaviour
     public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
 
     public GameObject enemyPrefab;
+    public GameObject bossPrefab;
+    GameObject prefabToSpawn; //Unknown and only assigned if it's the final boss fight or not
     public Transform spawnPointLeft;
     public Transform spawnPointCenter;
     public Transform spawnPointRight;
+    public Transform bossSpawnPoint;
     public EncounterData currentEncounter; //Hardcoded for now
 
     public TMP_Text turnText; //To  "Player Turn" / "Enemy Turn" banners
@@ -24,6 +27,8 @@ public class TurnManager : MonoBehaviour
 
     public SkillData healSkill;
     public SkillData chargeSkill;
+
+    private GameManager gameManager;
 
     //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
     private List<Transform> GetSpawnFormation(int enemyCount)
@@ -71,6 +76,7 @@ public class TurnManager : MonoBehaviour
 
     private void Start()
     {
+        gameManager = FindAnyObjectByType<GameManager>();
         SetState(BattleState.START);
     }
 
@@ -160,7 +166,7 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.SPAWN_ENEMIES);
     }
 
-    //TODO: Spawn enemies for this encounter
+    //Initalizes and spawns enemies for the current encounter
     private void HandleSpawnEnemies()
     {
         enemies.Clear(); //To prevent any previous loaded enemies from being spawned into the scene
@@ -174,7 +180,23 @@ public class TurnManager : MonoBehaviour
                     break;
                 }
 
-                GameObject newEnemyObject = Instantiate(enemyPrefab,formation[i].position, Quaternion.identity);
+                EnemyData dataToSpawn = currentEncounter.enemies[i];
+
+                //The final boss uses it's own special prefab since it is more than just a regular enemy. 
+                GameObject prefabToSpawn;
+                Vector3 spawnPosition;
+                if(dataToSpawn.isBoss == true)
+                {
+                    prefabToSpawn = bossPrefab;
+                    spawnPosition = bossSpawnPoint.position;
+                }
+                else
+                {
+                    prefabToSpawn = enemyPrefab;
+                    spawnPosition = formation[i].position;
+                }
+
+                GameObject newEnemyObject = Instantiate(prefabToSpawn,spawnPosition, Quaternion.identity);
                 Enemy newEnemy = newEnemyObject.GetComponent<Enemy>();
 
                 if(newEnemy != null)
@@ -185,7 +207,31 @@ public class TurnManager : MonoBehaviour
                 }
             }
         }
-        SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+        
+        if(currentEncounter != null && currentEncounter.enemyActsFirst == true)
+        {
+            StartCoroutine(HandleAmbushRoutine());
+        }
+        else
+        {
+            SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+        }
+    }
+
+    //Plays out a one-time ambush hit before the normal turn loop begins, for the final boss
+    private IEnumerator HandleAmbushRoutine()
+    {
+        Debug.Log("Lavos caught you off guard!"); //TEMP debug message
+        ShowTurnMessage("Lavos caught you off guard!");
+        yield return new WaitForSeconds(EnemyTurnAnnounceDelay);
+
+        if(player != null)
+        {
+            CombatActions.IgnoredDefenseAttack(player, 5); //Hardcoded damage done to player, ignores defense.
+        }
+
+        yield return new WaitForSeconds(EnemyTurnResultDelay);
+        SetState(BattleState.CHECK_WIN_LOSE);
     }
 
     //Calls ChooseNextIntent() on each enemy so their action is decided before the player acts
@@ -224,6 +270,11 @@ public class TurnManager : MonoBehaviour
                 int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
                 rolledDamage = player.ApplyChargeToDamage(rolledDamage);
                 CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING 
+
+                if(selectedTarget is Boss)
+                {
+                    CombatActions.Attack(player,3); //Thorns like mechanic dealt to the player when attacking the boss
+                }
             }
             else if(pendingPlayerAction == PlayerActionType.Defend)
             {
@@ -308,6 +359,10 @@ public class TurnManager : MonoBehaviour
 
         if(allEnemiesDead && enemies.Count > 0)
         {
+            if(gameManager != null)
+            {
+                gameManager.RegisterEncounterCleared(currentEncounter, player);
+            }
             SetState(BattleState.VICTORY);
             return;
         }

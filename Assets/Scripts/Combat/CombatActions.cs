@@ -9,6 +9,12 @@ public static class CombatActions
         target.TakeDamage(damage);  
     }
 
+    //Deals damage that ignores defense entirely - for effects like an ambush hit that should always land for a fixed amount
+    public static void IgnoredDefenseAttack(Character target, int damage)
+    {
+        target.IgnoredDefenseDamage(damage);
+    }
+
     //Spends FP and deals the skill's power as damage to the target. Returns false if
     //the caster doesn't have enough FP to use it
     public static bool UseSkill(Character caster, Character target, SkillData skill)

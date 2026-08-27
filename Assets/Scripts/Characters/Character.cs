@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 using UnityEngine;
 
 public abstract class Character : MonoBehaviour
@@ -12,6 +13,7 @@ public abstract class Character : MonoBehaviour
     public int maxFP;
     public int currentFP;
 
+    public float damageMultiplier = 1f; //Stat strictly for the final boss' special state
     private int bonusDefense = 0; //The bonus defense a character gains when using block on their turn
     private int bonusAttack = 0; //Temporary attack bonus from an attack buff being cast
     private int buffTurnsRemaining = 0; //Turn duration left on current buff before it is removed from character
@@ -46,7 +48,17 @@ public abstract class Character : MonoBehaviour
     {
         int totalDefense = defense + bonusDefense;
         int mitigatedDmg = Mathf.Max(damageTaken - totalDefense, 1); //The character will always take at least 1 damage
+        mitigatedDmg = Mathf.RoundToInt(mitigatedDmg * damageMultiplier);
         currentHP = Mathf.Max(currentHP - mitigatedDmg, 0); //Prevents health from ever going below 0
+
+        PlayDamageFlash();
+    }
+
+    //Method strictly used for final boss. Used to ignore player defense and deal 5 HP regardless
+    public virtual void IgnoredDefenseDamage(int damageTaken)
+    {
+        int finalDamage = Mathf.RoundToInt(damageTaken * damageMultiplier);
+        currentHP = Mathf.Max(currentHP - finalDamage, 0);
 
         PlayDamageFlash();
     }
