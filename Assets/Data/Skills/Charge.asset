@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d20a37838c4ba67479da19dc4ee48e96, type: 3}
   m_Name: Charge
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  skillName: 
-  fpCost: 0
+  skillName: Charge
+  fpCost: 4
   power: 0
   icon: {fileID: 0}

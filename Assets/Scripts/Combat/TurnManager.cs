@@ -163,6 +163,7 @@ public class TurnManager : MonoBehaviour
     //TODO: Spawn enemies for this encounter
     private void HandleSpawnEnemies()
     {
+        enemies.Clear(); //To prevent any previous loaded enemies from being spawned into the scene
         if(currentEncounter != null && enemyPrefab != null)
         {
             List<Transform> formation = GetSpawnFormation(currentEncounter.enemies.Count);
