@@ -14,6 +14,9 @@ public class TurnManager : MonoBehaviour
     public Transform spawnPointRight;
     public EncounterData currentEncounter; //Hardcoded for now
 
+    public SkillData healSkill;
+    public SkillData chargeSkill;
+
     //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
     private List<Transform> GetSpawnFormation(int enemyCount)
     {
@@ -199,6 +202,7 @@ public class TurnManager : MonoBehaviour
             if(pendingPlayerAction == PlayerActionType.Attack)
             {
                 int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
+                rolledDamage = player.ApplyChargeToDamage(rolledDamage);
                 CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING 
             }
             else if(pendingPlayerAction == PlayerActionType.Defend)
@@ -207,11 +211,24 @@ public class TurnManager : MonoBehaviour
             }
             else if(pendingPlayerAction == PlayerActionType.Heal)
             {
-                //Implement once Heal's SkillData design is worked out
+                bool healResolved = CombatActions.Heal(player, healSkill);
+
+                if(healResolved == false)
+                {
+                    Debug.Log("Not enough FP");
+                    SetState(BattleState.PLAYER_TURN); //Not enough FP.. Let's you try again rather than taking your turn away
+                    return;
+                }
             }
             else if(pendingPlayerAction == PlayerActionType.Charge)
             {
-                //Implement once Charge's delayed double damage mechanic is designed
+                bool chargeResolved = CombatActions.Charge(player, chargeSkill);
+
+                if(chargeResolved == false)
+                {
+                    SetState(BattleState.PLAYER_TURN);
+                    return;
+                }
             }
         }
         SetState(BattleState.ENEMY_TURN);

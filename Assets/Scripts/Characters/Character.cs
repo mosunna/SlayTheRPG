@@ -15,6 +15,8 @@ public abstract class Character : MonoBehaviour
     private int bonusDefense = 0; //The bonus defense a character gains when using block on their turn
     private int bonusAttack = 0; //Temporary attack bonus from an attack buff being cast
     private int buffTurnsRemaining = 0; //Turn duration left on current buff before it is removed from character
+    private bool isCharged = false; //Only true if player selects the charge spell
+    private const int ChargedDamageMultiplier = 2;
 
     private const float HPBarTweenDuration = 0.8f; //How long the main bar takes to animate to a new HP value
 
@@ -113,6 +115,24 @@ public abstract class Character : MonoBehaviour
             bonusAttack = 0;
         }
     }
+
+    //Marks player as charged
+    public virtual void ApplyCharge()
+    {
+        isCharged = true;
+    }
+
+    //Doubles the given damage if charged, then clears the charge by setting back to false. Returns damage unchanged otherwise
+    public int ApplyChargeToDamage(int damage)
+    {
+        if(isCharged == false)
+        {
+            return damage;
+        }
+
+        isCharged = false;
+        return damage * ChargedDamageMultiplier;
+}
 
     //Call this every frame (from a subclass's Update()) to drive a main HP bar, a trailing "ghost" bar,
     //and an HP number text. mainBarFill animates smoothly toward currentHP. ghostBarFill stays frozen at
