@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using System.Collections;
 
 public class TurnManager : MonoBehaviour
 {
@@ -13,6 +15,12 @@ public class TurnManager : MonoBehaviour
     public Transform spawnPointCenter;
     public Transform spawnPointRight;
     public EncounterData currentEncounter; //Hardcoded for now
+
+    public TMP_Text turnText; //To  "Player Turn" / "Enemy Turn" banners
+
+    private const float EnemyTurnAnnounceDelay = 0.75f; //Pause after "Enemy Turn" shows before the first enemy acts
+    private const float EnemyActionStaggerDelay = 0.4f; //Pause between each enemy's action when there's more than one
+    private const float EnemyTurnResultDelay = 0.5f; //Pause after the last enemy acts before checking win/lose
 
     public SkillData healSkill;
     public SkillData chargeSkill;
@@ -39,6 +47,15 @@ public class TurnManager : MonoBehaviour
         }
 
         return points;
+    }
+
+    //Updates the turn banner text
+    private void ShowTurnMessage(string message)
+    {
+        if(turnText != null)
+        {
+            turnText.text = message;
+        }
     }
 
     //Player will select an option from the battle menu. Heal and Charge will be categorized under Spell
@@ -85,7 +102,7 @@ public class TurnManager : MonoBehaviour
         }
         else if (newState == BattleState.ENEMY_TURN)
         {
-            HandleEnemyTurn();
+            StartCoroutine(HandleEnemyTurn());
         }
         else if (newState == BattleState.CHECK_WIN_LOSE)
         {
@@ -189,6 +206,8 @@ public class TurnManager : MonoBehaviour
             player.ResetDefense();
         }
 
+        ShowTurnMessage("Player Turn");
+
         //TODO: BattleUI input here
     }
 
@@ -235,8 +254,10 @@ public class TurnManager : MonoBehaviour
     }
 
     //Resets each enemy's Defend bonus at the start of its own turn
-    private void HandleEnemyTurn()
+    private IEnumerator HandleEnemyTurn()
     {
+        ShowTurnMessage("Enemy Turn");
+        yield return new WaitForSeconds(EnemyTurnAnnounceDelay);
         //Resets every enemy at once through the loop
         for(int i = 0; i < enemies.Count; i++)
         {
@@ -247,7 +268,10 @@ public class TurnManager : MonoBehaviour
 
             enemies[i].ResetDefense();
             enemies[i].ExecuteIntent();
+
+            yield return new WaitForSeconds(EnemyActionStaggerDelay);
         }
+            Debug.Log("[TurnManager] Enemy loop complete"); //TEMP
 
         //Decreases every enemy's buff by one turn asfter their action is processed
         for(int i = 0; i < enemies.Count; i++)
@@ -255,6 +279,7 @@ public class TurnManager : MonoBehaviour
             enemies[i].BuffDecay();
         }
 
+        yield return new WaitForSeconds(EnemyTurnResultDelay);
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
