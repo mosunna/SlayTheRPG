@@ -23,6 +23,32 @@ public static class CombatActions
         return true;
     }
 
+    //Spends FP and heals the caster by the skill's power. Returns false if not enough FP
+    public static bool Heal(Character caster, SkillData skill)
+    {
+        if (caster.currentFP < skill.fpCost)
+        {
+            return false;
+        }
+
+        caster.currentFP -= skill.fpCost;
+        caster.Heal(skill.power);
+        return true;
+    }
+
+    //Spends FP and charges the caster, doubling their next Attack's damage. Returns false if not enough FP
+    public static bool Charge(Character caster, SkillData skill)
+    {
+        if (caster.currentFP < skill.fpCost)
+        {
+            return false;
+        }
+
+        caster.currentFP -= skill.fpCost;
+        caster.ApplyCharge();
+        return true;
+    }
+
     //Applies a temporary Defense bonus to whoever is defending
     public static void Defend(Character character, int bonusAmount)
     {

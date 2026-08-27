@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : Character
 {
@@ -6,7 +7,11 @@ public class Enemy : Character
 
     public Intent CurrentIntent; //Set by ChooseNextIntent() during ENEMIES_CHOOSE_INTENT, read during ENEMY_TURN
 
-    private SpriteRenderer spriteRenderer;
+    //private SpriteRenderer spriteRenderer;
+
+    public UnityEngine.UI.Image hpBarFill;
+    public UnityEngine.UI.Image hpBarGhostFill;
+    public TMPro.TMP_Text hpNumberText;
 
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
     public void ChooseNextIntent(Character target)
@@ -55,17 +60,23 @@ public class Enemy : Character
         }
     }
 
+    //A built in Unity method
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         if(sourceData != null)
         {
-            InitalizeFromSourceData();
+            InitializeFromSourceData();
         }
     }
 
+    private void Update()
+    {
+        UpdateHPDisplay(hpBarFill, hpBarGhostFill, hpNumberText);
+    }
+
     //Copies this enemy's stats from its EnemyData asset into the runtime fields (so i don't have to manually add in stats)
-    private void InitalizeFromSourceData()
+    public void InitializeFromSourceData()
     {
         CharacterName = sourceData.enemyName;
         maxHP = sourceData.maxHP;
@@ -73,5 +84,21 @@ public class Enemy : Character
         attack = sourceData.attack;
         defense = sourceData.defense;
         spriteRenderer.sprite = sourceData.sprite;
+    }
+
+    private TurnManager turnManager;
+
+    private void Start()
+    {
+        turnManager = FindAnyObjectByType<TurnManager>();
+    }
+
+    //A built in Unity method. Just activates when mouse clicked on in gameobjects
+    private void OnMouseDown()
+    {
+        if(turnManager != null)
+        {
+            turnManager.SelectTarget(this);
+        }
     }
 }

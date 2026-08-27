@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using System.Collections;
 
 public class TurnManager : MonoBehaviour
 {
@@ -7,6 +9,65 @@ public class TurnManager : MonoBehaviour
 
     public Player player; //Assigned in the Inspector for now, until spawning exists
     public List<Enemy> enemies = new List<Enemy>(); //Assigned in the Inspector for now, until spawning exists
+
+    public GameObject enemyPrefab;
+    public Transform spawnPointLeft;
+    public Transform spawnPointCenter;
+    public Transform spawnPointRight;
+    public EncounterData currentEncounter; //Hardcoded for now
+
+    public TMP_Text turnText; //To  "Player Turn" / "Enemy Turn" banners
+
+    private const float EnemyTurnAnnounceDelay = 0.75f; //Pause after "Enemy Turn" shows before the first enemy acts
+    private const float EnemyActionStaggerDelay = 0.4f; //Pause between each enemy's action when there's more than one
+    private const float EnemyTurnResultDelay = 0.5f; //Pause after the last enemy acts before checking win/lose
+
+    public SkillData healSkill;
+    public SkillData chargeSkill;
+
+    //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
+    private List<Transform> GetSpawnFormation(int enemyCount)
+    {
+        List<Transform> points = new List<Transform>(); //The list storing the game space location of the enemies
+
+        if(enemyCount == 1)
+        {
+            points.Add(spawnPointCenter);
+        }
+        else if(enemyCount == 2)
+        {
+            points.Add(spawnPointLeft);
+            points.Add(spawnPointRight);
+        }
+        else if(enemyCount == 3)
+        {
+            points.Add(spawnPointLeft);
+            points.Add(spawnPointCenter);
+            points.Add(spawnPointRight);
+        }
+
+        return points;
+    }
+
+    //Updates the turn banner text
+    private void ShowTurnMessage(string message)
+    {
+        if(turnText != null)
+        {
+            turnText.text = message;
+        }
+    }
+
+    //Player will select an option from the battle menu. Heal and Charge will be categorized under Spell
+    private enum PlayerActionType
+    {
+        Attack, 
+        Defend,
+        Heal,
+        Charge
+    }
+    
+    private PlayerActionType pendingPlayerAction; // Which action was selected from UI buttons
 
     private void Start()
     {
@@ -41,11 +102,55 @@ public class TurnManager : MonoBehaviour
         }
         else if (newState == BattleState.ENEMY_TURN)
         {
-            HandleEnemyTurn();
+            StartCoroutine(HandleEnemyTurn());
         }
         else if (newState == BattleState.CHECK_WIN_LOSE)
         {
             HandleCheckWinLose();
+        }
+    }
+
+    private bool awaitingTarget = false; //Whether or not the game is waiting for you to select a target
+    //Called by the Attack button's OnClick()
+    public void OnAttackButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Attack;
+            awaitingTarget = true; //WAITS FOR PLAYER TO SELECT TARGET ENEMY
+        }
+    }
+
+    //Called by the Defend button's OnClick()
+    public void OnDefendButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Defend;
+            awaitingTarget = false;
+            SetState(BattleState.PLAYER_ACTION);
+        }
+    }
+
+    //Called by the Heal button's OnClick(), inside the Spell submenu
+    public void OnHealButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Heal;
+            awaitingTarget = false;
+            SetState(BattleState.PLAYER_ACTION);
+        }
+    }
+
+    //Called by the Charge button's OnClick(), inside the Spell submenu
+    public void OnChargeButtonPressed()
+    {
+        if(CurrentState == BattleState.PLAYER_TURN)
+        {
+            pendingPlayerAction = PlayerActionType.Charge;
+            awaitingTarget = false;
+            SetState(BattleState.PLAYER_ACTION);
         }
     }
 
@@ -58,6 +163,28 @@ public class TurnManager : MonoBehaviour
     //TODO: Spawn enemies for this encounter
     private void HandleSpawnEnemies()
     {
+        enemies.Clear(); //To prevent any previous loaded enemies from being spawned into the scene
+        if(currentEncounter != null && enemyPrefab != null)
+        {
+            List<Transform> formation = GetSpawnFormation(currentEncounter.enemies.Count);
+            for(int i = 0; i < currentEncounter.enemies.Count; i++)
+            {
+                if(i >= formation.Count)
+                {
+                    break;
+                }
+
+                GameObject newEnemyObject = Instantiate(enemyPrefab,formation[i].position, Quaternion.identity);
+                Enemy newEnemy = newEnemyObject.GetComponent<Enemy>();
+
+                if(newEnemy != null)
+                {
+                    newEnemy.sourceData = currentEncounter.enemies[i];
+                    newEnemy.InitializeFromSourceData();
+                    enemies.Add(newEnemy);
+                }
+            }
+        }
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
     }
 
@@ -80,6 +207,8 @@ public class TurnManager : MonoBehaviour
             player.ResetDefense();
         }
 
+        ShowTurnMessage("Player Turn");
+
         //TODO: BattleUI input here
     }
 
@@ -88,15 +217,48 @@ public class TurnManager : MonoBehaviour
     {
         if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
         {
-            int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
-            CombatActions.Attack(enemies[0], rolledDamage); //Attack enemies[0] as a test
+            EnsureValidTarget();
+
+            if(pendingPlayerAction == PlayerActionType.Attack)
+            {
+                int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
+                rolledDamage = player.ApplyChargeToDamage(rolledDamage);
+                CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING 
+            }
+            else if(pendingPlayerAction == PlayerActionType.Defend)
+            {
+                CombatActions.Defend(player, 3); //Placeholder bonus amount - tune once playtested
+            }
+            else if(pendingPlayerAction == PlayerActionType.Heal)
+            {
+                bool healResolved = CombatActions.Heal(player, healSkill);
+
+                if(healResolved == false)
+                {
+                    Debug.Log("Not enough FP");
+                    SetState(BattleState.PLAYER_TURN); //Not enough FP.. Let's you try again rather than taking your turn away
+                    return;
+                }
+            }
+            else if(pendingPlayerAction == PlayerActionType.Charge)
+            {
+                bool chargeResolved = CombatActions.Charge(player, chargeSkill);
+
+                if(chargeResolved == false)
+                {
+                    SetState(BattleState.PLAYER_TURN);
+                    return;
+                }
+            }
         }
         SetState(BattleState.ENEMY_TURN);
     }
 
     //Resets each enemy's Defend bonus at the start of its own turn
-    private void HandleEnemyTurn()
+    private IEnumerator HandleEnemyTurn()
     {
+        ShowTurnMessage("Enemy Turn");
+        yield return new WaitForSeconds(EnemyTurnAnnounceDelay);
         //Resets every enemy at once through the loop
         for(int i = 0; i < enemies.Count; i++)
         {
@@ -107,7 +269,10 @@ public class TurnManager : MonoBehaviour
 
             enemies[i].ResetDefense();
             enemies[i].ExecuteIntent();
+
+            yield return new WaitForSeconds(EnemyActionStaggerDelay);
         }
+            Debug.Log("[TurnManager] Enemy loop complete"); //TEMP
 
         //Decreases every enemy's buff by one turn asfter their action is processed
         for(int i = 0; i < enemies.Count; i++)
@@ -115,6 +280,7 @@ public class TurnManager : MonoBehaviour
             enemies[i].BuffDecay();
         }
 
+        yield return new WaitForSeconds(EnemyTurnResultDelay);
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
@@ -147,6 +313,43 @@ public class TurnManager : MonoBehaviour
         }
         
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+    }
+
+    private Enemy selectedTarget; //Which enemy is currently chosen as an attack target
+
+    //Called by an Enemy's OnMouseDown() when the player clicks it
+    public void SelectTarget(Enemy enemy)
+    {
+        if(enemy == null || enemy.IsDead())
+        {
+            return;
+        }
+
+        selectedTarget = enemy;
+
+        if(awaitingTarget == true && CurrentState == BattleState.PLAYER_TURN)
+        {
+            awaitingTarget = false;
+            SetState(BattleState.PLAYER_ACTION); //The click itself is what triggers the attack to resolve
+        }
+    }
+
+    //Ensures selectedTarget always points at a valid, living enemy before it's used
+    private void EnsureValidTarget()
+    {
+        if(selectedTarget != null && selectedTarget.IsDead() == false)
+        {
+            return;
+        }
+
+        for(int i = 0; i < enemies.Count; i++)
+        {
+            if(enemies[i].IsDead() == false)
+            {
+                selectedTarget = enemies[i];
+                return;
+            }
+        }
     }
 
     //Step past PLAYER_TURN from the Inspector to
