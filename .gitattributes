@@ -71,9 +71,6 @@ Assets/Plugins/**           linguist-generated
 Packages/packages-lock.json linguist-generated
 Assets/TextMesh\ Pro/**      linguist-vendored
 
-# Exclude from GitHub stats: TextMeshPro's imported shaders/resources (HLSL, ShaderLab)
-Assets/TextMesh Pro/**      linguist-vendored
-
 # Unity LFS
 *.cubemap               lfs
 *.unitypackage          lfs
