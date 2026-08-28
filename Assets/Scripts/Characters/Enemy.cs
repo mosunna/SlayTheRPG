@@ -14,7 +14,7 @@ public class Enemy : Character
     public TMPro.TMP_Text hpNumberText;
 
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
-    public void ChooseNextIntent(Character target)
+    public virtual void ChooseNextIntent(Character target)
     {
         int rolledDamage = CombatActions.RollDamage(EffectiveAttack);
 
@@ -37,7 +37,7 @@ public class Enemy : Character
     }
 
     //Executes the enemy's current intention, decisin will be applied through CombatActions
-    public void ExecuteIntent()
+    public virtual void ExecuteIntent()
     {
         //If statements on the three possibiltiies of enemy intent (what they plan to do on their turn)
 
