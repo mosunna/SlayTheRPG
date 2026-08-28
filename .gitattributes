@@ -69,6 +69,7 @@
 # Exclude from GitHub stats and diffs: third-party plugins, packages lock file
 Assets/Plugins/**           linguist-generated
 Packages/packages-lock.json linguist-generated
+Assets/TextMesh\ Pro/**      linguist-vendored
 
 # Exclude from GitHub stats: TextMeshPro's imported shaders/resources (HLSL, ShaderLab)
 Assets/TextMesh Pro/**      linguist-vendored
