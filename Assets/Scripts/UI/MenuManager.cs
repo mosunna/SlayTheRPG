@@ -14,6 +14,21 @@ public class MenuManager : MonoBehaviour
     private void Start()
     {
         gameManager = FindAnyObjectByType<GameManager>();
+
+        if(gameManager != null && gameManager.skipToLevelSelect == true)
+        {
+            gameManager.skipToLevelSelect = false;
+
+            if(titlePanel != null)
+            {
+                titlePanel.SetActive(false);
+            }
+
+            if(chooseLevelPanel != null)
+            {
+                chooseLevelPanel.SetActive(true);
+            }
+        }
     }
 
     //Called by the Play button's OnClick() on the Title panel

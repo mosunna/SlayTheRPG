@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
 {
     private List<EncounterData> clearedEncounters = new List<EncounterData>();
     private bool bossRewardGranted = false;
+    public bool skipToLevelSelect = false; //For when the player hits continue after a victory. Takes them back to the level select
 
     public string heroName = "Hero";
     public EncounterData selectedEncounter;
@@ -35,8 +36,17 @@ public class GameManager : MonoBehaviour
         
     }
 
-    private void Awake()
+    private void Awake() //Edited so that the game loop can properly happen when a player finishes a level. Without this, the game always returns back to title screen rather than level select
     {
+        GameManager[] existingManagers = FindObjectsByType<GameManager>();
+
+        if(existingManagers.Length > 1)
+        {
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return;
+        }
+
         DontDestroyOnLoad(gameObject);
     }
     

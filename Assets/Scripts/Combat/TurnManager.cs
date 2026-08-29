@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TurnManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class TurnManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject bossPrefab;
     public GameObject cultistPrefab;
+
     GameObject prefabToSpawn; //Unknown and only assigned if it's the final boss fight or not
     public Transform spawnPointLeft;
     public Transform spawnPointCenter;
@@ -20,16 +22,36 @@ public class TurnManager : MonoBehaviour
     public Transform bossSpawnPoint;
     public EncounterData currentEncounter; //Hardcoded for now
 
-    public TMP_Text turnText; //To  "Player Turn" / "Enemy Turn" banners
+    public GameObject turnBannerPanel; //Small banner box shown briefly for "Player Turn" / "Enemy Turn"
+    public TMP_Text turnText; //Text inside turnBannerPanel
+
+    public GameObject actionLogPanel; //Banner box below turnBannerPanel, recaps what just happened this turn
+    public TMP_Text actionLogText;
+    public GameObject victoryPanel;
+    public TMP_Text victoryText;
+    public GameObject continueButton;
+
+    public GameObject defeatPanel;
+    public TMP_Text defeatText;
+    public GameObject restartButton;
+    public GameObject quitButton;
+
+    public AudioSource audioSource;
+    public AudioClip victoryMusic;
+    public AudioClip defeatMusic;
 
     private const float EnemyTurnAnnounceDelay = 0.75f; //Pause after "Enemy Turn" shows before the first enemy acts
+    private const float PostBattleBannerDelay = 1.5f; //Pause after the banner appears before its buttons show (at the end of battle)
     private const float EnemyActionStaggerDelay = 0.4f; //Pause between each enemy's action when there's more than one
     private const float EnemyTurnResultDelay = 0.5f; //Pause after the last enemy acts before checking win/lose
+    private const float TurnBannerDisplayDuration = 1f; //How long the Player Turn banner stays visible before hiding
+    private const float ActionLogDisplayDuration = 1.5f; //How long the action log banner stays visible before hiding
 
     public SkillData healSkill;
     public SkillData chargeSkill;
 
     private GameManager gameManager;
+    private Coroutine actionLogHideRoutine; //Tracks the pending hide so a new action always gets the full display duration
 
     //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
     private List<Transform> GetSpawnFormation(int enemyCount)
@@ -55,12 +77,87 @@ public class TurnManager : MonoBehaviour
         return points;
     }
 
-    //Updates the turn banner text
-    private void ShowTurnMessage(string message)
+    //Shows the small Player/Enemy Turn banner
+    private void ShowTurnBanner(string message)
     {
+        if(turnBannerPanel != null)
+        {
+            turnBannerPanel.SetActive(true);
+        }
+
         if(turnText != null)
         {
             turnText.text = message;
+        }
+    }
+
+    //Hides the small Player/Enemy Turn banner
+    private void HideTurnBanner()
+    {
+        if(turnBannerPanel != null)
+        {
+            turnBannerPanel.SetActive(false);
+        }
+    }
+
+    //Shows the action log banner, describing what just happened this turn
+    private void ShowActionLog(string message)
+    {
+        if(actionLogPanel != null)
+        {
+            actionLogPanel.SetActive(true);
+        }
+
+        if(actionLogText != null)
+        {
+            actionLogText.text = message;
+        }
+
+        if(actionLogHideRoutine != null)
+        {
+            StopCoroutine(actionLogHideRoutine);
+        }
+
+        actionLogHideRoutine = StartCoroutine(HideActionLogAfterDelay());
+    }
+
+    //Waits, then hides the action log banner. Restarted by every new ShowActionLog call
+    //so a fresh message always gets the full display duration
+    private IEnumerator HideActionLogAfterDelay()
+    {
+        yield return new WaitForSeconds(ActionLogDisplayDuration);
+
+        if(actionLogPanel != null)
+        {
+            actionLogPanel.SetActive(false);
+        }
+    }
+
+    //Builds and shows the action log text for an enemy's just executed intent
+    private void LogEnemyAction(Enemy enemy)
+    {
+        if(enemy == null)
+        {
+            return;
+        }
+
+        if(enemy.CurrentIntent.type == IntentType.Attack)
+        {
+            ShowActionLog($"{enemy.CharacterName} attacks!");
+        }
+        else if(enemy.CurrentIntent.type == IntentType.Defend)
+        {
+            ShowActionLog($"{enemy.CharacterName} defends!");
+        }
+        else if(enemy.CurrentIntent.type == IntentType.Buff)
+        {
+            string targetName = "an ally";
+            if(enemy.CurrentIntent.target != null)
+            {
+                targetName = enemy.CurrentIntent.target.CharacterName;
+            }
+
+            ShowActionLog($"{enemy.CharacterName} buffs {targetName}!");
         }
     }
 
@@ -79,7 +176,7 @@ public class TurnManager : MonoBehaviour
     {
         gameManager = FindAnyObjectByType<GameManager>();
         
-        if(gameManager.selectedEncounter != null)
+        if(gameManager != null && gameManager.selectedEncounter != null)
         {
             currentEncounter = gameManager.selectedEncounter;
         }
@@ -106,7 +203,7 @@ public class TurnManager : MonoBehaviour
         }
         else if (newState == BattleState.PLAYER_TURN)
         {
-            HandlePlayerTurn();
+            StartCoroutine(HandlePlayerTurnRoutine());
         }
         else if (newState == BattleState.PLAYER_ACTION)
         {
@@ -119,6 +216,14 @@ public class TurnManager : MonoBehaviour
         else if (newState == BattleState.CHECK_WIN_LOSE)
         {
             HandleCheckWinLose();
+        }
+        else if (newState == BattleState.VICTORY)
+        {
+            StartCoroutine(HandleVictoryRoutine());
+        }
+        else if (newState == BattleState.DEFEAT)
+        {
+            StartCoroutine(HandleDefeatRoutine());
         }
     }
 
@@ -233,8 +338,9 @@ public class TurnManager : MonoBehaviour
     private IEnumerator HandleAmbushRoutine()
     {
         Debug.Log("Lavos caught you off guard!"); //TEMP debug message
-        ShowTurnMessage("Lavos caught you off guard!");
+        ShowTurnBanner("Lavos caught you off guard!");
         yield return new WaitForSeconds(EnemyTurnAnnounceDelay);
+        HideTurnBanner();
 
         if(player != null)
         {
@@ -257,14 +363,16 @@ public class TurnManager : MonoBehaviour
     }
 
     //Resets the player's Defend bonus at the start of their turn, then waits for input
-    private void HandlePlayerTurn()
+    private IEnumerator HandlePlayerTurnRoutine()
     {
         if(player != null) //Preventing code not compiling in Unity error
         {
             player.ResetDefense();
         }
 
-        ShowTurnMessage("Player Turn");
+        ShowTurnBanner("Player Turn");
+        yield return new WaitForSeconds(TurnBannerDisplayDuration);
+        HideTurnBanner();
 
         //TODO: BattleUI input here
     }
@@ -272,6 +380,12 @@ public class TurnManager : MonoBehaviour
     //Handles player's chosen actins and then moves to enemy's turn
     private void HandlePlayerAction()
     {
+        string heroName = "Hero";
+        if(gameManager != null && gameManager.heroName != "")
+        {
+            heroName = gameManager.heroName;
+        }
+
         if(player != null && enemies.Count > 0) //player null check set for debugged PLAYER_ACTION
         {
             EnsureValidTarget();
@@ -286,10 +400,13 @@ public class TurnManager : MonoBehaviour
                 {
                     CombatActions.Attack(player,3); //Thorns like mechanic dealt to the player when attacking the boss
                 }
+
+                ShowActionLog($"{heroName} attacks!");
             }
             else if(pendingPlayerAction == PlayerActionType.Defend)
             {
                 CombatActions.Defend(player, 3); //Placeholder bonus amount - tune once playtested
+                ShowActionLog($"{heroName} defends!");
             }
             else if(pendingPlayerAction == PlayerActionType.Heal)
             {
@@ -301,6 +418,8 @@ public class TurnManager : MonoBehaviour
                     SetState(BattleState.PLAYER_TURN); //Not enough FP.. Let's you try again rather than taking your turn away
                     return;
                 }
+
+                ShowActionLog($"{heroName} heals!");
             }
             else if(pendingPlayerAction == PlayerActionType.Charge)
             {
@@ -311,6 +430,8 @@ public class TurnManager : MonoBehaviour
                     SetState(BattleState.PLAYER_TURN);
                     return;
                 }
+
+                ShowActionLog($"{heroName} charges!");
             }
         }
         SetState(BattleState.ENEMY_TURN);
@@ -319,8 +440,9 @@ public class TurnManager : MonoBehaviour
     //Resets each enemy's Defend bonus at the start of its own turn
     private IEnumerator HandleEnemyTurn()
     {
-        ShowTurnMessage("Enemy Turn");
+        ShowTurnBanner("Enemy Turn");
         yield return new WaitForSeconds(EnemyTurnAnnounceDelay);
+        HideTurnBanner();
         //Resets every enemy at once through the loop
         for(int i = 0; i < enemies.Count; i++)
         {
@@ -331,6 +453,8 @@ public class TurnManager : MonoBehaviour
 
             enemies[i].ResetDefense();
             enemies[i].ExecuteIntent();
+
+            LogEnemyAction(enemies[i]);
 
             yield return new WaitForSeconds(EnemyActionStaggerDelay);
         }
@@ -379,6 +503,114 @@ public class TurnManager : MonoBehaviour
         }
         
         SetState(BattleState.ENEMIES_CHOOSE_INTENT);
+    }
+
+    //Shows the victory banner, names the defeated enemy (or "X and friends" for multi-enemy fights),
+//plays victory music, then reveals the Continue button after a short delay
+private IEnumerator HandleVictoryRoutine()
+{
+    if(victoryPanel != null)
+    {
+        victoryPanel.SetActive(true);
+    }
+
+    string enemyName = "The enemies";
+    if(enemies.Count > 0)
+    {
+        enemyName = enemies[0].CharacterName;
+        if(enemies.Count > 1)
+        {
+            enemyName += " and friends";
+        }
+    }
+
+    if(victoryText != null)
+    {
+        victoryText.text = $"{enemyName} has been defeated!";
+    }
+
+    if(audioSource != null && victoryMusic != null)
+    {
+        audioSource.clip = victoryMusic;
+        audioSource.Play();
+    }
+
+    if(continueButton != null)
+    {
+        continueButton.SetActive(false);
+    }
+
+    yield return new WaitForSeconds(PostBattleBannerDelay);
+
+    if(continueButton != null)
+    {
+        continueButton.SetActive(true);
+    }
+}
+
+//Shows the defeat banner with the hero's name, then reveals Restart/Quit after a short delay
+private IEnumerator HandleDefeatRoutine()
+{
+    if(defeatPanel != null)
+    {
+        defeatPanel.SetActive(true);
+    }
+
+    string heroName = "Hero";
+    if(gameManager != null && gameManager.heroName != "")
+    {
+        heroName = gameManager.heroName;
+    }
+
+    if(defeatText != null)
+    {
+        defeatText.text = $"{heroName} has been defeated!";
+    }
+
+    if(restartButton != null)
+    {
+        restartButton.SetActive(false);
+    }
+
+    if(quitButton != null)
+    {
+        quitButton.SetActive(false);
+    }
+
+    yield return new WaitForSeconds(PostBattleBannerDelay);
+
+    if(restartButton != null)
+    {
+        restartButton.SetActive(true);
+    }
+
+    if(quitButton != null)
+    {
+        quitButton.SetActive(true);
+    }
+}
+
+    //Called by the Continue button's OnClick() after victory. Returns to Choose Level, not Title
+    public void OnContinuePressed()
+    {
+        if(gameManager != null)
+        {
+            gameManager.skipToLevelSelect = true;
+        }
+
+        SceneManager.LoadScene("Main Menu");
+    }
+
+    //Called by the Restart button's OnClick() after defeat. Reloads the same encounter fresh
+    public void OnRestartPressed()
+    {
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    //Called by the Quit button's OnClick() after defeat. Returns to the Title screen
+    public void OnQuitPressed()
+    {
+        SceneManager.LoadScene("Main Menu");
     }
 
     private Enemy selectedTarget; //Which enemy is currently chosen as an attack target
