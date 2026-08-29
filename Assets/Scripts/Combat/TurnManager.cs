@@ -12,6 +12,7 @@ public class TurnManager : MonoBehaviour
 
     public GameObject enemyPrefab;
     public GameObject bossPrefab;
+    public GameObject cultistPrefab;
     GameObject prefabToSpawn; //Unknown and only assigned if it's the final boss fight or not
     public Transform spawnPointLeft;
     public Transform spawnPointCenter;
@@ -190,6 +191,11 @@ public class TurnManager : MonoBehaviour
                     prefabToSpawn = bossPrefab;
                     spawnPosition = bossSpawnPoint.position;
                 }
+                else if(dataToSpawn.isLunaticCultist == true)
+                {
+                    prefabToSpawn = cultistPrefab;
+                    spawnPosition = formation[i].position;
+                }
                 else
                 {
                     prefabToSpawn = enemyPrefab;
@@ -239,7 +245,7 @@ public class TurnManager : MonoBehaviour
     {
         for(int i = 0; i < enemies.Count; i++)
         {
-            enemies[i].ChooseNextIntent(player);
+            enemies[i].ChooseNextIntent(player, enemies);
         }
 
         SetState(BattleState.PLAYER_TURN);

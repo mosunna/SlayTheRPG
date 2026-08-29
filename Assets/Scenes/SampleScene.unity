@@ -593,6 +593,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0cae49cee36584449950ae8d645049b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  heroName: Hero
+  requiredEncountersForBossReward: 3
 --- !u!1 &502152644
 GameObject:
   m_ObjectHideFlags: 0
@@ -1806,11 +1808,12 @@ MonoBehaviour:
   enemies: []
   enemyPrefab: {fileID: 1940321889382562749, guid: be6f9c0256b59554db576ca12555ad24, type: 3}
   bossPrefab: {fileID: 1940321889382562749, guid: 06a794997a3497c4dbb26e9f6c40d481, type: 3}
+  cultistPrefab: {fileID: 1940321889382562749, guid: 3fa090e384e141c42821baaf6869144f, type: 3}
   spawnPointLeft: {fileID: 1388761216}
   spawnPointCenter: {fileID: 1813431021}
   spawnPointRight: {fileID: 627802450}
   bossSpawnPoint: {fileID: 1018548819}
-  currentEncounter: {fileID: 11400000, guid: beef7b2f47bb49b489c58db215b846ec, type: 2}
+  currentEncounter: {fileID: 11400000, guid: 100d9976242e78c4988ccd638b595958, type: 2}
   turnText: {fileID: 1414815300}
   healSkill: {fileID: 11400000, guid: ec6dd0bef7f49994986762123af246f0, type: 2}
   chargeSkill: {fileID: 11400000, guid: 1b911bebcbdf13a47b4f5fb14b4e2ed7, type: 2}

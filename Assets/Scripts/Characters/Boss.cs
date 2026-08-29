@@ -1,10 +1,11 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Boss : Enemy
 {
     private int cycleTurn = 0; //Tracks position in the fixed 4-turn cycle: 1=Charges, 2=Attacks, 3=Shields, 4=Exposed
 
-    public override void ChooseNextIntent(Character target)
+    public override void ChooseNextIntent(Character target, List<Enemy> allies) //Added allies to allow for LunaticCultist to target its ally
     {
         cycleTurn++;
         if(cycleTurn > 4)

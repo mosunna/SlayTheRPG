@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f4b7962b133e14da4380c4f9e2273f, type: 3}
+  m_Name: LunaticCultist
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  enemyName: LunaticCultis
+  sprite: {fileID: 1039947546027334085, guid: ac5c078b5fcccaa4daa2a47f3a12ed01, type: 3}
+  exposedSprite: {fileID: 0}
+  maxHP: 45
+  attack: 9
+  defense: 1
+  maxHits: 1
+  showsIntent: 1
+  isBoss: 0
+  isLunaticCultist: 1

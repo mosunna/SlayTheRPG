@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Enemy : Character
 {
@@ -14,7 +15,7 @@ public class Enemy : Character
     public TMPro.TMP_Text hpNumberText;
 
     //Decides this enemy's next action and stores it as CurrentIntent, to be read and executed during ENEMY_TURN
-    public virtual void ChooseNextIntent(Character target)
+    public virtual void ChooseNextIntent(Character target, List<Enemy> allies) //Added allies to allow for LunaticCultist to target its ally
     {
         int rolledDamage = CombatActions.RollDamage(EffectiveAttack);
 
