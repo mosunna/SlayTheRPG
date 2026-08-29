@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class MenuManager : MonoBehaviour
 {
     public GameObject titlePanel;
     public GameObject namePanel;
+    public GameObject chooseLevelPanel;
     public TMP_InputField heroNameInput;
 
     private GameManager gameManager;
@@ -49,5 +51,23 @@ public class MenuManager : MonoBehaviour
         {
             namePanel.SetActive(false);
         }
+
+        if(chooseLevelPanel != null)
+        {
+            chooseLevelPanel.SetActive(true);
+        }
+     
+    }
+
+    //Called by each level/boss button's OnClick(). Each button passes its own
+    //EncounterData as the fixed argument, set in the Inspector
+    public void OnLevelSelected(EncounterData encounter)
+    {
+        if(gameManager != null && encounter != null)
+        {
+            gameManager.selectedEncounter = encounter;
+        }
+
+        SceneManager.LoadScene("SampleScene");
     }
 }

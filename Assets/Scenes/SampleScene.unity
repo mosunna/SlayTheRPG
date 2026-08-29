@@ -549,52 +549,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &361117275
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 361117276}
-  - component: {fileID: 361117277}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &361117276
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 361117275}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &361117277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 361117275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0cae49cee36584449950ae8d645049b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  heroName: Hero
-  requiredEncountersForBossReward: 3
 --- !u!1 &502152644
 GameObject:
   m_ObjectHideFlags: 0
@@ -1813,7 +1767,7 @@ MonoBehaviour:
   spawnPointCenter: {fileID: 1813431021}
   spawnPointRight: {fileID: 627802450}
   bossSpawnPoint: {fileID: 1018548819}
-  currentEncounter: {fileID: 11400000, guid: 100d9976242e78c4988ccd638b595958, type: 2}
+  currentEncounter: {fileID: 0}
   turnText: {fileID: 1414815300}
   healSkill: {fileID: 11400000, guid: ec6dd0bef7f49994986762123af246f0, type: 2}
   chargeSkill: {fileID: 11400000, guid: 1b911bebcbdf13a47b4f5fb14b4e2ed7, type: 2}
@@ -2497,7 +2451,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 619394802}
-  - {fileID: 361117276}
   - {fileID: 1726067337}
   - {fileID: 252444613}
   - {fileID: 502152647}

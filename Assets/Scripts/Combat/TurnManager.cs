@@ -78,6 +78,11 @@ public class TurnManager : MonoBehaviour
     private void Start()
     {
         gameManager = FindAnyObjectByType<GameManager>();
+        
+        if(gameManager.selectedEncounter != null)
+        {
+            currentEncounter = gameManager.selectedEncounter;
+        }
         SetState(BattleState.START);
     }
 

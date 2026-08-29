@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     private bool bossRewardGranted = false;
 
     public string heroName = "Hero";
+    public EncounterData selectedEncounter;
     public int requiredEncountersForBossReward = 3;
 
     public void RegisterEncounterCleared(EncounterData encounter, Player player)
