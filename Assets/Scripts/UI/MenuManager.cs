@@ -34,6 +34,11 @@ public class MenuManager : MonoBehaviour
     //Called by the Play button's OnClick() on the Title panel
     public void OnPlayButtonPressed()
     {
+        if(gameManager != null)
+        {
+            gameManager.ResetRun();
+        }
+
         if(titlePanel != null)
         {
             titlePanel.SetActive(false);

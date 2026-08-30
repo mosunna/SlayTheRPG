@@ -180,6 +180,12 @@ public class TurnManager : MonoBehaviour
         {
             currentEncounter = gameManager.selectedEncounter;
         }
+
+        if(gameManager != null)
+        {
+            gameManager.LoadPlayerStats(player);
+        }
+
         SetState(BattleState.START);
     }
 
@@ -497,6 +503,7 @@ public class TurnManager : MonoBehaviour
             if(gameManager != null)
             {
                 gameManager.RegisterEncounterCleared(currentEncounter, player);
+                gameManager.ApplyPostEncounterRecovery(player);
             }
             SetState(BattleState.VICTORY);
             return;

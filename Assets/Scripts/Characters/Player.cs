@@ -9,8 +9,13 @@ public class Player : Character
     public UnityEngine.UI.Image hpBarGhostFill;
     public TMPro.TMP_Text hpNumberText;
 
+    public UnityEngine.UI.Image fpBarFill;
+    public UnityEngine.UI.Image fpBarGhostFill;
+    public TMPro.TMP_Text fpNumberText;
+
     private void Update()
     {
         UpdateHPDisplay(hpBarFill, hpBarGhostFill, hpNumberText);
+        UpdateFPDisplay(fpBarFill, fpBarGhostFill, fpNumberText);
     }
 }

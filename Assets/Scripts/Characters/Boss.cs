@@ -50,7 +50,7 @@ public class Boss : Enemy
            
             //Exposes core: stays vulnerable through the player's following turn,
             //until Turn 1 of the next cycle resets it
-            damageMultiplier = 2f; //Double damage received
+            damageMultiplier = 6f; //SIX TIMES damage received
 
             if(spriteRenderer != null)
             {
