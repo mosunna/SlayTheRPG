@@ -27,6 +27,13 @@ public abstract class Character : MonoBehaviour
     private Coroutine hpBarCoroutine;
     private int lastObservedHP; //The currentHP value the tween last reacted to, so mid-tween frames don't restart it
 
+    private const float FPBarTweenDuration = 0.8f; //How long the FP bar takes to animate to a new FP value
+
+    private float displayedFP; //The FP value the main bar is currently showing/animating toward
+    private bool displayedFPInitialized = false;
+    private Coroutine fpBarCoroutine;
+    private int lastObservedFP; //The currentFP value the tween last reacted to, so mid-tween frames don't restart it
+
     public SpriteRenderer spriteRenderer;
     private const float DamageFlashDuration = 0.3f;
     private const int DamageFlashBlinkCount = 3;
@@ -185,7 +192,7 @@ public abstract class Character : MonoBehaviour
 
         if(hpNumberText != null)
         {
-            hpNumberText.text = $"{currentHP}/{maxHP}";
+            hpNumberText.text = $"HP: {currentHP}/{maxHP}";
         }
     }
 
@@ -222,6 +229,84 @@ public abstract class Character : MonoBehaviour
         if(ghostBarFill != null)
         {
             ghostBarFill.fillAmount = (float)currentHP / Mathf.Max(maxHP, 1);
+        }
+    }
+
+    //Call this every frame (from a subclass's Update()) to drive a main FP bar, a trailing "ghost" bar,
+    //and an FP number text. Mirrors UpdateHPDisplay exactly, just tracking FP instead of HP.
+    //Any of the three parameters can be left null if that piece of UI doesn't exist for this character.
+    protected void UpdateFPDisplay(UnityEngine.UI.Image mainBarFill, UnityEngine.UI.Image ghostBarFill, TMPro.TMP_Text fpNumberText)
+    {
+        if(displayedFPInitialized == false)
+        {
+            displayedFP = currentFP;
+            lastObservedFP = currentFP;
+            displayedFPInitialized = true;
+
+            if(ghostBarFill != null)
+            {
+                ghostBarFill.fillAmount = (float)currentFP / Mathf.Max(maxFP, 1);
+            }
+        }
+
+        //Only react when currentFP actually changes, not every frame a tween is still mid-flight -
+        //otherwise this would restart the coroutine every frame and it would never reach its final step
+        if(currentFP != lastObservedFP)
+        {
+            lastObservedFP = currentFP;
+
+            if(fpBarCoroutine != null)
+            {
+                StopCoroutine(fpBarCoroutine);
+            }
+
+            fpBarCoroutine = StartCoroutine(AnimateFPBar(mainBarFill, ghostBarFill));
+        }
+
+        if(mainBarFill != null)
+        {
+            mainBarFill.fillAmount = displayedFP / Mathf.Max(maxFP, 1);
+        }
+
+        if(fpNumberText != null)
+        {
+            fpNumberText.text = $"FP: {currentFP}/{maxFP}";
+        }
+    }
+
+    //Animates displayedFP from its current value toward currentFP over FPBarTweenDuration seconds.
+    //ghostBarFill is left untouched (still showing the old value) until the animation finishes, then snaps to match.
+    private IEnumerator AnimateFPBar(UnityEngine.UI.Image mainBarFill, UnityEngine.UI.Image ghostBarFill)
+    {
+        float startValue = displayedFP;
+        float endValue = currentFP;
+        float elapsed = 0f;
+
+        while(elapsed < FPBarTweenDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / FPBarTweenDuration;
+            float easedT = 1f - Mathf.Pow(1f - t, 3f); //Cubic ease-out: fast at first, slows into a crawl near the end
+            displayedFP = Mathf.Lerp(startValue, endValue, easedT);
+
+            if(mainBarFill != null)
+            {
+                mainBarFill.fillAmount = displayedFP / Mathf.Max(maxFP, 1);
+            }
+
+            yield return null;
+        }
+
+        displayedFP = endValue;
+
+        if(mainBarFill != null)
+        {
+            mainBarFill.fillAmount = displayedFP / Mathf.Max(maxFP, 1);
+        }
+
+        if(ghostBarFill != null)
+        {
+            ghostBarFill.fillAmount = (float)currentFP / Mathf.Max(maxFP, 1);
         }
     }
 

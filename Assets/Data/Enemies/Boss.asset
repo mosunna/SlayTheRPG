@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82f4b7962b133e14da4380c4f9e2273f, type: 3}
   m_Name: Boss
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  enemyName: LAVOS, ALIEN OF TIME
+  enemyName: LAVOS
   sprite: {fileID: -6248741079362886434, guid: 720a0697ca6a53b4d87ae977887ab534, type: 3}
   exposedSprite: {fileID: 517872079062614928, guid: f14e8f16c66e06f4498ca0e4fac7a667, type: 3}
   maxHP: 90
@@ -21,3 +21,4 @@ MonoBehaviour:
   maxHits: 1
   showsIntent: 0
   isBoss: 1
+  isLunaticCultist: 0

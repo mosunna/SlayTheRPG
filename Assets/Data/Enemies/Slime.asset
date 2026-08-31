@@ -14,8 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Slime
   sprite: {fileID: 21300000, guid: bc62c16fc00014f4b8d96728f3529e99, type: 3}
+  exposedSprite: {fileID: 0}
   maxHP: 10
   attack: 5
-  defense: 2
+  defense: 1
   maxHits: 1
   showsIntent: 1
+  isBoss: 0
+  isLunaticCultist: 0
