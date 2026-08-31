@@ -39,6 +39,7 @@ public class TurnManager : MonoBehaviour
     public AudioSource audioSource;
     public AudioClip victoryMusic;
     public AudioClip defeatMusic;
+    public AudioClip bossVictoryMusic;
 
     private const float EnemyTurnAnnounceDelay = 0.75f; //Pause after "Enemy Turn" shows before the first enemy acts
     private const float PostBattleBannerDelay = 1.5f; //Pause after the banner appears before its buttons show (at the end of battle)
@@ -46,6 +47,7 @@ public class TurnManager : MonoBehaviour
     private const float EnemyTurnResultDelay = 0.5f; //Pause after the last enemy acts before checking win/lose
     private const float TurnBannerDisplayDuration = 1f; //How long the Player Turn banner stays visible before hiding
     private const float ActionLogDisplayDuration = 1.5f; //How long the action log banner stays visible before hiding
+    private const float BossEndingPauseDelay = 1f;
 
     public SkillData healSkill;
     public SkillData chargeSkill;
@@ -143,11 +145,21 @@ public class TurnManager : MonoBehaviour
 
         if(enemy.CurrentIntent.type == IntentType.Attack)
         {
-            ShowActionLog($"{enemy.CharacterName} attacks!");
+            //Boss's Attack turn always lands the charged hit from the previous turn, so it gets a heavier line
+            //to cue the player toward blocking, regular enemies keep the plain attack line
+            Boss bossEnemy = enemy as Boss;
+            if(bossEnemy != null)
+            {
+                ShowActionLog($"{enemy.CharacterName} unleashes a crushing blow!");
+            }
+            else
+            {
+                ShowActionLog($"{enemy.CharacterName} attacks!");
+            }
         }
         else if(enemy.CurrentIntent.type == IntentType.Defend)
         {
-            ShowActionLog($"{enemy.CharacterName} defends!");
+            ShowActionLog($"{enemy.CharacterName} braces itself. It's straining to hold firm!");
         }
         else if(enemy.CurrentIntent.type == IntentType.Buff)
         {
@@ -158,6 +170,14 @@ public class TurnManager : MonoBehaviour
             }
 
             ShowActionLog($"{enemy.CharacterName} buffs {targetName}!");
+        }
+        else if(enemy.CurrentIntent.type == IntentType.Charge)
+        {
+            ShowActionLog($"{enemy.CharacterName} is charging up!");
+        }
+        else if(enemy.CurrentIntent.type == IntentType.Expose)
+        {
+            ShowActionLog($"{enemy.CharacterName} is exhausted. Core exposed!");
         }
     }
 
@@ -225,7 +245,14 @@ public class TurnManager : MonoBehaviour
         }
         else if (newState == BattleState.VICTORY)
         {
-            StartCoroutine(HandleVictoryRoutine());
+            if(IsBossEncounter() == true)
+            {
+                StartCoroutine(HandleBossEndingRoutine());
+            }
+            else
+            {
+                StartCoroutine(HandleVictoryRoutine());
+            }
         }
         else if (newState == BattleState.DEFEAT)
         {
@@ -350,7 +377,7 @@ public class TurnManager : MonoBehaviour
 
         if(player != null)
         {
-            CombatActions.IgnoredDefenseAttack(player, 5); //Hardcoded damage done to player, ignores defense.
+            CombatActions.IgnoredDefenseAttack(player, 5); //Flat, unavoidable ambush damage, kept small since it is a surprise beat, not a real threat
         }
 
         yield return new WaitForSeconds(EnemyTurnResultDelay);
@@ -477,6 +504,25 @@ public class TurnManager : MonoBehaviour
     }
 
     //Handles the check for whether the player or all enemies are dead
+    //Returns true if the encounter currently being fought includes the final boss
+    private bool IsBossEncounter()
+    {
+        if(currentEncounter == null || currentEncounter.enemies == null)
+        {
+            return false;
+        }
+
+        for(int i = 0; i < currentEncounter.enemies.Count; i++)
+        {
+            if(currentEncounter.enemies[i].isBoss == true)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void HandleCheckWinLose()
     {
         if(player != null && player.IsDead())
@@ -553,6 +599,38 @@ private IEnumerator HandleVictoryRoutine()
     {
         continueButton.SetActive(true);
     }
+}
+
+//Plays a music cue, waits briefly, then hands off to the Main Menu scene to show the ending screen
+private IEnumerator HandleBossEndingRoutine()
+{
+    if(audioSource != null && bossVictoryMusic != null)
+    {
+        audioSource.clip = bossVictoryMusic;
+        audioSource.Play();
+    }
+
+    yield return new WaitForSeconds(BossEndingPauseDelay);
+
+    string heroName = "Hero";
+    if(gameManager != null && gameManager.heroName != "")
+    {
+        heroName = gameManager.heroName;
+    }
+
+    string bossName = "The boss";
+    if(enemies.Count > 0)
+    {
+        bossName = enemies[0].CharacterName;
+    }
+
+    if(gameManager != null)
+    {
+        gameManager.endingMessage = $"{heroName} has defeated {bossName}!";
+        gameManager.showEndingScreen = true;
+    }
+
+    SceneManager.LoadScene("Main Menu");
 }
 
 //Shows the defeat banner with the hero's name, then reveals Restart/Quit after a short delay

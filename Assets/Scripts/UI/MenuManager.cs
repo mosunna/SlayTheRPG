@@ -9,11 +9,36 @@ public class MenuManager : MonoBehaviour
     public GameObject chooseLevelPanel;
     public TMP_InputField heroNameInput;
 
+    public GameObject endscreenPanel;
+    public TMP_Text endingText;
+
     private GameManager gameManager;
 
     private void Start()
     {
         gameManager = FindAnyObjectByType<GameManager>();
+
+        if(gameManager != null && gameManager.showEndingScreen == true)
+        {
+            gameManager.showEndingScreen = false;
+
+            if(titlePanel != null)
+            {
+                titlePanel.SetActive(false);
+            }
+
+            if(endingText != null)
+            {
+                endingText.text = gameManager.endingMessage;
+            }
+
+            if(endscreenPanel != null)
+            {
+                endscreenPanel.SetActive(true);
+            }
+
+            return;
+        }
 
         if(gameManager != null && gameManager.skipToLevelSelect == true)
         {
@@ -89,5 +114,11 @@ public class MenuManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("SampleScene");
+    }
+
+    //Called by the Return to Title button's OnClick() on the ending screen. Reloads Main Menu fresh, landing on Title
+    public void OnReturnToTitleFromEndingPressed()
+    {
+        SceneManager.LoadScene("Main Menu");
     }
 }

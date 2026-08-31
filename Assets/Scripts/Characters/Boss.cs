@@ -13,9 +13,24 @@ public class Boss : Enemy
             cycleTurn = 1;
         }
 
-        //CurrentIntent isn't shown to the player (EnemyData.showsIntent is false for the boss),
-        //but ExecuteIntent() still needs a stored target for its Attack turn
-        CurrentIntent = new Intent(IntentType.Attack, 0, 1, target, null);
+        //CurrentIntent isn't shown to the player as an icon (EnemyData.showsIntent is false for the boss),
+        //but its type now drives the action log text, and ExecuteIntent() still needs a stored target for the Attack turn
+        if(cycleTurn == 1)
+        {
+            CurrentIntent = new Intent(IntentType.Charge, 0, 1, target, null);
+        }
+        else if(cycleTurn == 2)
+        {
+            CurrentIntent = new Intent(IntentType.Attack, 0, 1, target, null);
+        }
+        else if(cycleTurn == 3)
+        {
+            CurrentIntent = new Intent(IntentType.Defend, 0, 1, target, null);
+        }
+        else if(cycleTurn == 4)
+        {
+            CurrentIntent = new Intent(IntentType.Expose, 0, 1, target, null);
+        }
     }
 
     public override void ExecuteIntent()
@@ -43,7 +58,7 @@ public class Boss : Enemy
         {
             //Shields: bonus defense for this cycle
             Debug.Log("Lavos curls in its shell!");
-            CombatActions.Defend(this, 5); //Placeholder bonus amount
+            CombatActions.Defend(this, 5); //Raises total defense to 9, enough to floor the player's attack to the 1-damage minimum
         }
         else if(cycleTurn == 4)
         {

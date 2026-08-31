@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
     private List<EncounterData> clearedEncounters = new List<EncounterData>();
     private bool bossRewardGranted = false;
     public bool skipToLevelSelect = false; //For when the player hits continue after a victory. Takes them back to the level select
+    public bool showEndingScreen = false; //For when the player beats the final boss. Tells MenuManager to show the ending screen instead of Title
+    public string endingMessage = ""; //Set by TurnManager right before the ending screen loads, read by MenuManager to fill in its text
 
     public string heroName = "Hero";
     public EncounterData selectedEncounter;

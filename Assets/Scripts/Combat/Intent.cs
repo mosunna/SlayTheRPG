@@ -4,7 +4,9 @@ public enum IntentType
 {
     Attack, //Deals damage to the target
     Defend, //Applies a temporary Defense bonus to self
-    Buff //Increases another character's stats or own stats
+    Buff, //Increases another character's stats or own stats
+    Charge, //Powers up this character's next Attack turn
+    Expose //Leaves this character vulnerable to bonus damage until its next Charge
 }
 
 public struct Intent
