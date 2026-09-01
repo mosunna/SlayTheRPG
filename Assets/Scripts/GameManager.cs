@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     public EncounterData selectedEncounter;
     public int requiredEncountersForBossReward = 3;
 
+    public AudioSource audioSource; //Lives on this persistent GameObject so music started here survives scene loads
+
     private const float HPRecoveryPercent = 0.3f; //Restores a portion of missing HP after each win, softens the no-healing attrition run without fully undoing it. Placeholder - tune once playtested
     private const float FPRecoveryPercent = 0.6f; //Higher than HP's rate since FP's pool is much smaller, a flat 30% barely moves it. Keeps Charge usable across multiple fights. Placeholder - tune once playtested
 
@@ -144,6 +146,27 @@ public class GameManager : MonoBehaviour
         player.currentHP = savedCurrentHP;
         player.maxFP = savedMaxFP;
         player.currentFP = savedCurrentFP;
+    }
+
+    //Plays a music clip that carries across a scene load, since this GameObject persists via DontDestroyOnLoad.
+    //Used for cues that need to keep playing after the scene that started them is gone, like the boss victory theme
+    public void PlayPersistentMusic(AudioClip clip)
+    {
+        if(audioSource != null && clip != null)
+        {
+            audioSource.clip = clip;
+            audioSource.Play();
+        }
+    }
+
+    //Stops whatever is currently playing on the persistent AudioSource, so a leftover track
+    //(like the boss victory theme) doesn't keep playing under Title music once the run resets
+    public void StopPersistentMusic()
+    {
+        if(audioSource != null)
+        {
+            audioSource.Stop();
+        }
     }
 
     //Clears all carried-over run state. Called when starting a brand new run from the Title screen,

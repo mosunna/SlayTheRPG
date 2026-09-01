@@ -1602,6 +1602,122 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764266760}
   m_CullTransparentMesh: 1
+--- !u!1001 &909069817
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3896567151122398548, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4973203153298128163, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1814310767497442226, guid: e71098a3375d0a84c829c37a468b7a90, type: 3}
+    - target: {fileID: 8236761363816628293, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_Name
+      value: TransitionCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 8236761363816628293, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+--- !u!114 &909069818 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7153005385044655907, guid: 87b5448f21734584ca7072f409f793d0, type: 3}
+  m_PrefabInstance: {fileID: 909069817}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4153e3858d8ce954fb88f2d2e091f3f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TransitionManager
 --- !u!1 &1018548818
 GameObject:
   m_ObjectHideFlags: 0
@@ -3186,6 +3302,8 @@ MonoBehaviour:
   spawnPointRight: {fileID: 627802450}
   bossSpawnPoint: {fileID: 1018548819}
   currentEncounter: {fileID: 0}
+  attackIntentIcon: {fileID: -4193543712899033508, guid: a9813d75945b33c44818f3200296afdb, type: 3}
+  buffIntentIcon: {fileID: -7628111247878029281, guid: 1280982a4992b494284ce21cbca6ad9f, type: 3}
   turnBannerPanel: {fileID: 1480556039}
   turnText: {fileID: 1414815300}
   actionLogPanel: {fileID: 1780518992}
@@ -3197,9 +3315,13 @@ MonoBehaviour:
   defeatText: {fileID: 2065093749}
   restartButton: {fileID: 748329175}
   quitButton: {fileID: 1975612052}
-  audioSource: {fileID: 0}
-  victoryMusic: {fileID: 0}
-  defeatMusic: {fileID: 0}
+  audioSource: {fileID: 1726067338}
+  victoryMusic: {fileID: 8300000, guid: 324afaeb024a1c640bedd6711ca05271, type: 3}
+  defeatMusic: {fileID: 8300000, guid: a4e03b0093bd0d343ba52d87e29b9d50, type: 3}
+  bossVictoryMusic: {fileID: 8300000, guid: 54552cc9d27552649b7cd7c2c3fb0844, type: 3}
+  buttonClickSfx: {fileID: 8300000, guid: 3141b5636e7fb0e4dbf34100c92273e9, type: 3}
+  playerAttackSfx: {fileID: 8300000, guid: ab3d3e986c81f7b469b323e90d5934e6, type: 3}
+  transitionManager: {fileID: 909069818}
   healSkill: {fileID: 11400000, guid: ec6dd0bef7f49994986762123af246f0, type: 2}
   chargeSkill: {fileID: 11400000, guid: 1b911bebcbdf13a47b4f5fb14b4e2ed7, type: 2}
 --- !u!4 &1726067337
@@ -3230,7 +3352,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.056
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -4467,3 +4589,4 @@ SceneRoots:
   - {fileID: 502152647}
   - {fileID: 250874563}
   - {fileID: 1030720609}
+  - {fileID: 909069817}

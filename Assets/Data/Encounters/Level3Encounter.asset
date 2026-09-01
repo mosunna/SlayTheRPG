@@ -16,3 +16,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d10c824c8f9199340b2d98651def6e4d, type: 2}
   - {fileID: 11400000, guid: 60742941128db8d459474aab7b98d48e, type: 2}
   enemyActsFirst: 0
+  levelMusic: {fileID: 8300000, guid: 1977daa6e33ed3343920f43f0dd66c05, type: 3}
