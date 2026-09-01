@@ -556,7 +556,7 @@ public class TurnManager : MonoBehaviour
 
                 if(healResolved == false)
                 {
-                    Debug.Log("Not enough FP");
+                    ShowActionLog("Not enough FP");
                     SetState(BattleState.PLAYER_TURN); //Not enough FP.. Let's you try again rather than taking your turn away
                     return;
                 }
@@ -569,6 +569,7 @@ public class TurnManager : MonoBehaviour
 
                 if(chargeResolved == false)
                 {
+                    ShowActionLog("Not enough FP");
                     SetState(BattleState.PLAYER_TURN);
                     return;
                 }
