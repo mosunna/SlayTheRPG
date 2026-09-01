@@ -22,3 +22,6 @@ MonoBehaviour:
   showsIntent: 1
   isBoss: 0
   isLunaticCultist: 1
+  isSlime: 0
+  defendChance: 0
+  defendBonus: 3

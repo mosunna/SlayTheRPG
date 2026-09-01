@@ -14,6 +14,7 @@ public class TurnManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject bossPrefab;
     public GameObject cultistPrefab;
+    public GameObject slimePrefab;
 
     GameObject prefabToSpawn; //Unknown and only assigned if it's the final boss fight or not
     public Transform spawnPointLeft;
@@ -24,6 +25,8 @@ public class TurnManager : MonoBehaviour
 
     public Sprite attackIntentIcon;
     public Sprite buffIntentIcon;
+    public Sprite defendIntentIcon;
+    public Sprite splitIntentIcon; //Shown on a slime's two children in place of their real icon, since a split happens off-cycle
 
     public GameObject turnBannerPanel; //Small banner box shown briefly for "Player Turn" / "Enemy Turn"
     public TMP_Text turnText; //Text inside turnBannerPanel
@@ -55,6 +58,8 @@ public class TurnManager : MonoBehaviour
     private const float TurnBannerDisplayDuration = 1f; //How long the Player Turn banner stays visible before hiding
     private const float ActionLogDisplayDuration = 1.5f; //How long the action log banner stays visible before hiding
     private const float BossEndingPauseDelay = 1f;
+    private const float SlimeSplitOffset = 0.5f; //How far left/right of the parent each split child spawns
+    private const float SlimeChildScale = 0.7f; //Visual size reduction for split children, since they reuse the parent's sprite
 
     public SkillData healSkill;
     public SkillData chargeSkill;
@@ -175,7 +180,16 @@ public class TurnManager : MonoBehaviour
         }
         else if(enemy.CurrentIntent.type == IntentType.Defend)
         {
-            ShowActionLog($"{enemy.CharacterName} braces itself. It's straining to hold firm!");
+            //Boss's Shield turn keeps its causal bracing-then-fatigue flavor text, regular enemies get a plain generic line
+            Boss bossEnemy = enemy as Boss;
+            if(bossEnemy != null)
+            {
+                ShowActionLog($"{enemy.CharacterName} braces itself. It's straining to hold firm!");
+            }
+            else
+            {
+                ShowActionLog($"{enemy.CharacterName} raises its guard!");
+            }
         }
         else if(enemy.CurrentIntent.type == IntentType.Buff)
         {
@@ -380,6 +394,11 @@ public class TurnManager : MonoBehaviour
                     prefabToSpawn = cultistPrefab;
                     spawnPosition = formation[i].position;
                 }
+                else if(dataToSpawn.isSlime == true)
+                {
+                    prefabToSpawn = slimePrefab;
+                    spawnPosition = formation[i].position;
+                }
                 else
                 {
                     prefabToSpawn = enemyPrefab;
@@ -425,13 +444,60 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
+    //Called by a Slime when it crosses the 50% HP threshold. Replaces it with two smaller slimes
+    //that each inherit its exact current HP, and immediately choose their own intent so they can
+    //still act this round even though ENEMIES_CHOOSE_INTENT already ran before this happens
+    public void HandleSlimeSplit(Slime parent)
+    {
+        if(parent == null || slimePrefab == null)
+        {
+            return;
+        }
+
+        int inheritedHP = parent.currentHP;
+        Vector3 basePosition = parent.transform.position;
+        EnemyData parentSourceData = parent.sourceData;
+
+        SpawnSlimeChild(basePosition + Vector3.left * SlimeSplitOffset, inheritedHP, parentSourceData);
+        SpawnSlimeChild(basePosition + Vector3.right * SlimeSplitOffset, inheritedHP, parentSourceData);
+
+        enemies.Remove(parent);
+        Destroy(parent.gameObject);
+    }
+
+    //Instantiates one child slime from a split, with its HP and max HP both set to the inherited value
+    private void SpawnSlimeChild(Vector3 spawnPosition, int inheritedHP, EnemyData sourceData)
+    {
+        GameObject newSlimeObject = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
+        newSlimeObject.transform.localScale *= SlimeChildScale;
+
+        Slime newSlime = newSlimeObject.GetComponent<Slime>();
+
+        if(newSlime != null)
+        {
+            newSlime.sourceData = sourceData;
+            newSlime.InitializeFromSourceData();
+            newSlime.maxHP = inheritedHP;
+            newSlime.currentHP = inheritedHP;
+            newSlime.canSplit = false;
+            newSlime.ChooseNextIntent(player, enemies); //Still rolled for real so it acts correctly this round, only the icon is withheld
+            newSlime.ShowMysteryIcon(splitIntentIcon);
+            enemies.Add(newSlime);
+        }
+    }
+
     //Calls ChooseNextIntent() on each enemy so their action is decided before the player acts
     private void HandleEnemiesChooseIntent()
     {
         for(int i = 0; i < enemies.Count; i++)
         {
+            if(enemies[i].IsDead() == true)
+            {
+                continue; //Dead enemies shouldn't choose or display a new intent
+            }
+
             enemies[i].ChooseNextIntent(player, enemies);
-            enemies[i].UpdateIntentIcon(attackIntentIcon, buffIntentIcon);
+            enemies[i].UpdateIntentIcon(attackIntentIcon, buffIntentIcon, defendIntentIcon);
         }
 
         SetState(BattleState.PLAYER_TURN);
@@ -611,18 +677,25 @@ private IEnumerator HandleVictoryRoutine()
     }
 
     string enemyName = "The enemies";
+    string verb = "have"; //Matches the default "The enemies" and the "and friends" case, both plural
+
     if(enemies.Count > 0)
     {
         enemyName = enemies[0].CharacterName;
+
         if(enemies.Count > 1)
         {
             enemyName += " and friends";
+        }
+        else
+        {
+            verb = "has"; //Only a single named enemy is singular
         }
     }
 
     if(victoryText != null)
     {
-        victoryText.text = $"{enemyName} has been defeated!";
+        victoryText.text = $"{enemyName} {verb} been defeated!";
     }
 
     if(audioSource != null && victoryMusic != null)
