@@ -28,6 +28,8 @@ public class TurnManager : MonoBehaviour
     public Sprite defendIntentIcon;
     public Sprite splitIntentIcon; //Shown on a slime's two children in place of their real icon, since a split happens off-cycle
 
+    public GameObject battleMenuPanel; //Holds the Attack/Charge/Heal/Defend buttons, only shown while it's the player's turn
+
     public GameObject turnBannerPanel; //Small banner box shown briefly for "Player Turn" / "Enemy Turn"
     public TMP_Text turnText; //Text inside turnBannerPanel
 
@@ -120,6 +122,15 @@ public class TurnManager : MonoBehaviour
         if(turnBannerPanel != null)
         {
             turnBannerPanel.SetActive(false);
+        }
+    }
+
+    //Shows or hides the battle menu, so it's only clickable while it's actually the player's turn
+    private void SetBattleMenuActive(bool isActive)
+    {
+        if(battleMenuPanel != null)
+        {
+            battleMenuPanel.SetActive(isActive);
         }
     }
 
@@ -514,6 +525,7 @@ public class TurnManager : MonoBehaviour
         ShowTurnBanner("Player Turn");
         yield return new WaitForSeconds(TurnBannerDisplayDuration);
         HideTurnBanner();
+        SetBattleMenuActive(true);
 
         //TODO: BattleUI input here
     }
@@ -521,6 +533,8 @@ public class TurnManager : MonoBehaviour
     //Handles player's chosen actins and then moves to enemy's turn
     private void HandlePlayerAction()
     {
+        SetBattleMenuActive(false);
+
         string heroName = "Hero";
         if(gameManager != null && gameManager.heroName != "")
         {

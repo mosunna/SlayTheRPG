@@ -153,9 +153,9 @@ RectTransform:
   - {fileID: 1828263210}
   m_Father: {fileID: 1362726433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 80, y: -45}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &94453793
@@ -286,9 +286,9 @@ RectTransform:
   - {fileID: 1353628642}
   m_Father: {fileID: 1362726433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 80, y: -105}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &231225971
@@ -2423,7 +2423,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1362726433
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3307,6 +3307,7 @@ MonoBehaviour:
   buffIntentIcon: {fileID: -7628111247878029281, guid: 1280982a4992b494284ce21cbca6ad9f, type: 3}
   defendIntentIcon: {fileID: 7007528128593450181, guid: d36f816335733aa458c52f2e42edab21, type: 3}
   splitIntentIcon: {fileID: 6376088937063021185, guid: 4fd473d38451d924cb8fe6263e45aee8, type: 3}
+  battleMenuPanel: {fileID: 1362726432}
   turnBannerPanel: {fileID: 1480556039}
   turnText: {fileID: 1414815300}
   actionLogPanel: {fileID: 1780518992}
@@ -3854,9 +3855,9 @@ RectTransform:
   - {fileID: 664827387}
   m_Father: {fileID: 1362726433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 80, y: -75}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1865259082
@@ -3987,9 +3988,9 @@ RectTransform:
   - {fileID: 1524767471}
   m_Father: {fileID: 1362726433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 80, y: -15}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1953321729
