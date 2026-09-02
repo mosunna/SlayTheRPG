@@ -14,6 +14,7 @@ public class TurnManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject bossPrefab;
     public GameObject cultistPrefab;
+    public GameObject slimePrefab;
 
     GameObject prefabToSpawn; //Unknown and only assigned if it's the final boss fight or not
     public Transform spawnPointLeft;
@@ -21,6 +22,13 @@ public class TurnManager : MonoBehaviour
     public Transform spawnPointRight;
     public Transform bossSpawnPoint;
     public EncounterData currentEncounter; //Hardcoded for now
+
+    public Sprite attackIntentIcon;
+    public Sprite buffIntentIcon;
+    public Sprite defendIntentIcon;
+    public Sprite splitIntentIcon; //Shown on a slime's two children in place of their real icon, since a split happens off-cycle
+
+    public GameObject battleMenuPanel; //Holds the Attack/Charge/Heal/Defend buttons, only shown while it's the player's turn
 
     public GameObject turnBannerPanel; //Small banner box shown briefly for "Player Turn" / "Enemy Turn"
     public TMP_Text turnText; //Text inside turnBannerPanel
@@ -40,6 +48,10 @@ public class TurnManager : MonoBehaviour
     public AudioClip victoryMusic;
     public AudioClip defeatMusic;
     public AudioClip bossVictoryMusic;
+    public AudioClip buttonClickSfx;
+    public AudioClip playerAttackSfx;
+
+    public TransitionManager transitionManager;
 
     private const float EnemyTurnAnnounceDelay = 0.75f; //Pause after "Enemy Turn" shows before the first enemy acts
     private const float PostBattleBannerDelay = 1.5f; //Pause after the banner appears before its buttons show (at the end of battle)
@@ -48,12 +60,23 @@ public class TurnManager : MonoBehaviour
     private const float TurnBannerDisplayDuration = 1f; //How long the Player Turn banner stays visible before hiding
     private const float ActionLogDisplayDuration = 1.5f; //How long the action log banner stays visible before hiding
     private const float BossEndingPauseDelay = 1f;
+    private const float SlimeSplitOffset = 0.5f; //How far left/right of the parent each split child spawns
+    private const float SlimeChildScale = 0.7f; //Visual size reduction for split children, since they reuse the parent's sprite
 
     public SkillData healSkill;
     public SkillData chargeSkill;
 
     private GameManager gameManager;
     private Coroutine actionLogHideRoutine; //Tracks the pending hide so a new action always gets the full display duration
+
+    //Plays a one-shot SFX without disturbing whatever music is currently looping on the same AudioSource
+    private void PlaySfx(AudioClip clip)
+    {
+        if(audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
 
     //Helper method to determine where the enemies should appear on screen depending on enemyCount in battle
     private List<Transform> GetSpawnFormation(int enemyCount)
@@ -99,6 +122,15 @@ public class TurnManager : MonoBehaviour
         if(turnBannerPanel != null)
         {
             turnBannerPanel.SetActive(false);
+        }
+    }
+
+    //Shows or hides the battle menu, so it's only clickable while it's actually the player's turn
+    private void SetBattleMenuActive(bool isActive)
+    {
+        if(battleMenuPanel != null)
+        {
+            battleMenuPanel.SetActive(isActive);
         }
     }
 
@@ -159,7 +191,16 @@ public class TurnManager : MonoBehaviour
         }
         else if(enemy.CurrentIntent.type == IntentType.Defend)
         {
-            ShowActionLog($"{enemy.CharacterName} braces itself. It's straining to hold firm!");
+            //Boss's Shield turn keeps its causal bracing-then-fatigue flavor text, regular enemies get a plain generic line
+            Boss bossEnemy = enemy as Boss;
+            if(bossEnemy != null)
+            {
+                ShowActionLog($"{enemy.CharacterName} braces itself. It's straining to hold firm!");
+            }
+            else
+            {
+                ShowActionLog($"{enemy.CharacterName} raises its guard!");
+            }
         }
         else if(enemy.CurrentIntent.type == IntentType.Buff)
         {
@@ -201,12 +242,29 @@ public class TurnManager : MonoBehaviour
             currentEncounter = gameManager.selectedEncounter;
         }
 
+        if(audioSource != null && currentEncounter != null && currentEncounter.levelMusic != null)
+        {
+            audioSource.clip = currentEncounter.levelMusic;
+            audioSource.Play();
+        }
+
         if(gameManager != null)
         {
             gameManager.LoadPlayerStats(player);
         }
 
+        if(transitionManager != null)
+        {
+            transitionManager.FadeIn(OnBattleFadeInComplete);
+        }
+
         SetState(BattleState.START);
+    }
+
+    //Called once the entering-battle fade finishes revealing the screen
+    private void OnBattleFadeInComplete()
+    {
+        Debug.Log("Battle fade-in complete");
     }
 
     //Transitions the battle to a new state and logs it
@@ -264,6 +322,8 @@ public class TurnManager : MonoBehaviour
     //Called by the Attack button's OnClick()
     public void OnAttackButtonPressed()
     {
+        PlaySfx(buttonClickSfx);
+
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Attack;
@@ -274,6 +334,8 @@ public class TurnManager : MonoBehaviour
     //Called by the Defend button's OnClick()
     public void OnDefendButtonPressed()
     {
+        PlaySfx(buttonClickSfx);
+
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Defend;
@@ -285,6 +347,8 @@ public class TurnManager : MonoBehaviour
     //Called by the Heal button's OnClick(), inside the Spell submenu
     public void OnHealButtonPressed()
     {
+        PlaySfx(buttonClickSfx);
+
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Heal;
@@ -296,6 +360,8 @@ public class TurnManager : MonoBehaviour
     //Called by the Charge button's OnClick(), inside the Spell submenu
     public void OnChargeButtonPressed()
     {
+        PlaySfx(buttonClickSfx);
+
         if(CurrentState == BattleState.PLAYER_TURN)
         {
             pendingPlayerAction = PlayerActionType.Charge;
@@ -337,6 +403,11 @@ public class TurnManager : MonoBehaviour
                 else if(dataToSpawn.isLunaticCultist == true)
                 {
                     prefabToSpawn = cultistPrefab;
+                    spawnPosition = formation[i].position;
+                }
+                else if(dataToSpawn.isSlime == true)
+                {
+                    prefabToSpawn = slimePrefab;
                     spawnPosition = formation[i].position;
                 }
                 else
@@ -384,12 +455,60 @@ public class TurnManager : MonoBehaviour
         SetState(BattleState.CHECK_WIN_LOSE);
     }
 
+    //Called by a Slime when it crosses the 50% HP threshold. Replaces it with two smaller slimes
+    //that each inherit its exact current HP, and immediately choose their own intent so they can
+    //still act this round even though ENEMIES_CHOOSE_INTENT already ran before this happens
+    public void HandleSlimeSplit(Slime parent)
+    {
+        if(parent == null || slimePrefab == null)
+        {
+            return;
+        }
+
+        int inheritedHP = parent.currentHP;
+        Vector3 basePosition = parent.transform.position;
+        EnemyData parentSourceData = parent.sourceData;
+
+        SpawnSlimeChild(basePosition + Vector3.left * SlimeSplitOffset, inheritedHP, parentSourceData);
+        SpawnSlimeChild(basePosition + Vector3.right * SlimeSplitOffset, inheritedHP, parentSourceData);
+
+        enemies.Remove(parent);
+        Destroy(parent.gameObject);
+    }
+
+    //Instantiates one child slime from a split, with its HP and max HP both set to the inherited value
+    private void SpawnSlimeChild(Vector3 spawnPosition, int inheritedHP, EnemyData sourceData)
+    {
+        GameObject newSlimeObject = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
+        newSlimeObject.transform.localScale *= SlimeChildScale;
+
+        Slime newSlime = newSlimeObject.GetComponent<Slime>();
+
+        if(newSlime != null)
+        {
+            newSlime.sourceData = sourceData;
+            newSlime.InitializeFromSourceData();
+            newSlime.maxHP = inheritedHP;
+            newSlime.currentHP = inheritedHP;
+            newSlime.canSplit = false;
+            newSlime.ChooseNextIntent(player, enemies); //Still rolled for real so it acts correctly this round, only the icon is withheld
+            newSlime.ShowMysteryIcon(splitIntentIcon);
+            enemies.Add(newSlime);
+        }
+    }
+
     //Calls ChooseNextIntent() on each enemy so their action is decided before the player acts
     private void HandleEnemiesChooseIntent()
     {
         for(int i = 0; i < enemies.Count; i++)
         {
+            if(enemies[i].IsDead() == true)
+            {
+                continue; //Dead enemies shouldn't choose or display a new intent
+            }
+
             enemies[i].ChooseNextIntent(player, enemies);
+            enemies[i].UpdateIntentIcon(attackIntentIcon, buffIntentIcon, defendIntentIcon);
         }
 
         SetState(BattleState.PLAYER_TURN);
@@ -406,6 +525,7 @@ public class TurnManager : MonoBehaviour
         ShowTurnBanner("Player Turn");
         yield return new WaitForSeconds(TurnBannerDisplayDuration);
         HideTurnBanner();
+        SetBattleMenuActive(true);
 
         //TODO: BattleUI input here
     }
@@ -413,6 +533,8 @@ public class TurnManager : MonoBehaviour
     //Handles player's chosen actins and then moves to enemy's turn
     private void HandlePlayerAction()
     {
+        SetBattleMenuActive(false);
+
         string heroName = "Hero";
         if(gameManager != null && gameManager.heroName != "")
         {
@@ -427,7 +549,8 @@ public class TurnManager : MonoBehaviour
             {
                 int rolledDamage = CombatActions.RollDamage(player.EffectiveAttack);
                 rolledDamage = player.ApplyChargeToDamage(rolledDamage);
-                CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING 
+                CombatActions.Attack(selectedTarget, rolledDamage); //NOW USES PLAYER SELECTED TARGETTING
+                PlaySfx(playerAttackSfx);
 
                 if(selectedTarget is Boss)
                 {
@@ -447,7 +570,7 @@ public class TurnManager : MonoBehaviour
 
                 if(healResolved == false)
                 {
-                    Debug.Log("Not enough FP");
+                    ShowActionLog("Not enough FP");
                     SetState(BattleState.PLAYER_TURN); //Not enough FP.. Let's you try again rather than taking your turn away
                     return;
                 }
@@ -460,6 +583,7 @@ public class TurnManager : MonoBehaviour
 
                 if(chargeResolved == false)
                 {
+                    ShowActionLog("Not enough FP");
                     SetState(BattleState.PLAYER_TURN);
                     return;
                 }
@@ -568,18 +692,25 @@ private IEnumerator HandleVictoryRoutine()
     }
 
     string enemyName = "The enemies";
+    string verb = "have"; //Matches the default "The enemies" and the "and friends" case, both plural
+
     if(enemies.Count > 0)
     {
         enemyName = enemies[0].CharacterName;
+
         if(enemies.Count > 1)
         {
             enemyName += " and friends";
+        }
+        else
+        {
+            verb = "has"; //Only a single named enemy is singular
         }
     }
 
     if(victoryText != null)
     {
-        victoryText.text = $"{enemyName} has been defeated!";
+        victoryText.text = $"{enemyName} {verb} been defeated!";
     }
 
     if(audioSource != null && victoryMusic != null)
@@ -604,10 +735,12 @@ private IEnumerator HandleVictoryRoutine()
 //Plays a music cue, waits briefly, then hands off to the Main Menu scene to show the ending screen
 private IEnumerator HandleBossEndingRoutine()
 {
-    if(audioSource != null && bossVictoryMusic != null)
+    //Played through GameManager's own AudioSource instead of this scene's, since this scene
+    //(and its AudioSource) is destroyed by the SceneManager.LoadScene call below. GameManager
+    //persists via DontDestroyOnLoad, so the music keeps playing straight into the ending screen
+    if(gameManager != null)
     {
-        audioSource.clip = bossVictoryMusic;
-        audioSource.Play();
+        gameManager.PlayPersistentMusic(bossVictoryMusic);
     }
 
     yield return new WaitForSeconds(BossEndingPauseDelay);
@@ -652,6 +785,12 @@ private IEnumerator HandleDefeatRoutine()
         defeatText.text = $"{heroName} has been defeated!";
     }
 
+    if(audioSource != null && defeatMusic != null)
+    {
+        audioSource.clip = defeatMusic;
+        audioSource.Play();
+    }
+
     if(restartButton != null)
     {
         restartButton.SetActive(false);
@@ -678,6 +817,8 @@ private IEnumerator HandleDefeatRoutine()
     //Called by the Continue button's OnClick() after victory. Returns to Choose Level, not Title
     public void OnContinuePressed()
     {
+        PlaySfx(buttonClickSfx);
+
         if(gameManager != null)
         {
             gameManager.skipToLevelSelect = true;
@@ -689,12 +830,22 @@ private IEnumerator HandleDefeatRoutine()
     //Called by the Restart button's OnClick() after defeat. Reloads the same encounter fresh
     public void OnRestartPressed()
     {
-        SceneManager.LoadScene("SampleScene");
+        PlaySfx(buttonClickSfx);
+
+        if(transitionManager != null)
+        {
+            transitionManager.FadeOut(() => SceneManager.LoadScene("Battle Scene"));
+        }
+        else
+        {
+            SceneManager.LoadScene("Battle Scene");
+        }
     }
 
     //Called by the Quit button's OnClick() after defeat. Returns to the Title screen
     public void OnQuitPressed()
     {
+        PlaySfx(buttonClickSfx);
         SceneManager.LoadScene("Main Menu");
     }
 

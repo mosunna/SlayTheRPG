@@ -123,8 +123,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   CharacterName: Carnivorous Plant
-  maxHP: 55
-  currentHP: 55
+  maxHP: 28
+  currentHP: 28
   attack: 5
   defense: 5
   maxFP: 10
@@ -135,6 +135,7 @@ MonoBehaviour:
   hpBarFill: {fileID: 5521991484539495450}
   hpBarGhostFill: {fileID: 5755748376532689339}
   hpNumberText: {fileID: 0}
+  intentIconImage: {fileID: 0}
 --- !u!212 &4289634396442984172
 SpriteRenderer:
   serializedVersion: 2
@@ -238,7 +239,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.6875}
+  m_Size: {x: 3.59, y: 2.5}
   m_EdgeRadius: 0
 --- !u!1 &3642114601675880042
 GameObject:

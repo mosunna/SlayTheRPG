@@ -12,7 +12,33 @@ public class MenuManager : MonoBehaviour
     public GameObject endscreenPanel;
     public TMP_Text endingText;
 
+    public TransitionManager transitionManager;
+
+    public AudioSource audioSource;
+    public AudioClip titleMusic;
+    public AudioClip levelSelectMusic;
+    public AudioClip buttonClickSfx;
+
     private GameManager gameManager;
+
+    //Plays a music clip on the shared AudioSource, replacing whatever is currently playing
+    private void PlayMusic(AudioClip clip)
+    {
+        if(audioSource != null && clip != null)
+        {
+            audioSource.clip = clip;
+            audioSource.Play();
+        }
+    }
+
+    //Plays a one-shot SFX without disturbing whatever music is currently looping on the same AudioSource
+    private void PlayClickSfx()
+    {
+        if(audioSource != null && buttonClickSfx != null)
+        {
+            audioSource.PlayOneShot(buttonClickSfx);
+        }
+    }
 
     private void Start()
     {
@@ -53,12 +79,19 @@ public class MenuManager : MonoBehaviour
             {
                 chooseLevelPanel.SetActive(true);
             }
+
+            PlayMusic(levelSelectMusic);
+            return;
         }
+
+        PlayMusic(titleMusic);
     }
 
     //Called by the Play button's OnClick() on the Title panel
     public void OnPlayButtonPressed()
     {
+        PlayClickSfx();
+
         if(gameManager != null)
         {
             gameManager.ResetRun();
@@ -78,6 +111,8 @@ public class MenuManager : MonoBehaviour
     //Called by the Confirm button's OnClick() on the Name panel
     public void OnNameConfirmed()
     {
+        PlayClickSfx();
+
         string enteredName = "Hero";
 
         if(heroNameInput != null && heroNameInput.text != "")
@@ -101,24 +136,41 @@ public class MenuManager : MonoBehaviour
         {
             chooseLevelPanel.SetActive(true);
         }
-     
+
+        PlayMusic(levelSelectMusic);
     }
 
     //Called by each level/boss button's OnClick(). Each button passes its own
     //EncounterData as the fixed argument, set in the Inspector
     public void OnLevelSelected(EncounterData encounter)
     {
+        PlayClickSfx();
+
         if(gameManager != null && encounter != null)
         {
             gameManager.selectedEncounter = encounter;
         }
 
-        SceneManager.LoadScene("SampleScene");
+        if(transitionManager != null)
+        {
+            transitionManager.FadeOut(() => SceneManager.LoadScene("Battle Scene"));
+        }
+        else
+        {
+            SceneManager.LoadScene("Battle Scene");
+        }
     }
 
     //Called by the Return to Title button's OnClick() on the ending screen. Reloads Main Menu fresh, landing on Title
     public void OnReturnToTitleFromEndingPressed()
     {
+        PlayClickSfx();
+
+        if(gameManager != null)
+        {
+            gameManager.StopPersistentMusic(); //Stops the still-playing boss victory theme so it doesn't overlap with Title music
+        }
+
         SceneManager.LoadScene("Main Menu");
     }
 }

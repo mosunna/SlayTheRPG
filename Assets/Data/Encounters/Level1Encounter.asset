@@ -15,3 +15,4 @@ MonoBehaviour:
   enemies:
   - {fileID: 11400000, guid: ea27e47a8b410f84586858adf80ae307, type: 2}
   enemyActsFirst: 0
+  levelMusic: {fileID: 8300000, guid: 6ba9735b23a5a1c4693b8601ef1570dd, type: 3}

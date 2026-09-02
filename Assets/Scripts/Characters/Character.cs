@@ -39,6 +39,8 @@ public abstract class Character : MonoBehaviour
     private const int DamageFlashBlinkCount = 3;
     private Coroutine damageFlashCoroutine;
 
+    private Color deathTintColor = new Color(0.4f, 0.4f, 0.4f, 1f); //Grays out a dead character's sprite
+
     public int EffectiveAttack
     {
         get {return attack + bonusAttack;}
@@ -59,6 +61,7 @@ public abstract class Character : MonoBehaviour
         currentHP = Mathf.Max(currentHP - mitigatedDmg, 0); //Prevents health from ever going below 0
 
         PlayDamageFlash();
+        ApplyDeathTintIfDead();
     }
 
     //Method strictly used for final boss. Used to ignore player defense and deal 5 HP regardless
@@ -68,6 +71,16 @@ public abstract class Character : MonoBehaviour
         currentHP = Mathf.Max(currentHP - finalDamage, 0);
 
         PlayDamageFlash();
+        ApplyDeathTintIfDead();
+    }
+
+    //Grays out this character's sprite once its HP hits 0, giving dead enemies a visual "defeated" state
+    private void ApplyDeathTintIfDead()
+    {
+        if(IsDead() == true && spriteRenderer != null)
+        {
+            spriteRenderer.color = deathTintColor;
+        }
     }
 
     private void PlayDamageFlash()
