@@ -2,7 +2,7 @@
 
 A 2D turn-based RPG built in Unity. The player fights through three encounters, and a final boss with a distinct four-turn cycle, in a short combat loop with its own AI variety, progression, and presentation layer.
 
-*[gif placeholder]*
+*![Gameplay](https://github.com/mosunna/SlaytheRPG/blob/main/Media/videotogif.gif)*
 
 **Play it:** *[https://mosunna.itch.io/slaytherpg]*
 
