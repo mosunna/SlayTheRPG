@@ -123,8 +123,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   CharacterName: Carnivorous Plant
-  maxHP: 28
-  currentHP: 28
+  maxHP: 24
+  currentHP: 24
   attack: 5
   defense: 5
   maxFP: 10
