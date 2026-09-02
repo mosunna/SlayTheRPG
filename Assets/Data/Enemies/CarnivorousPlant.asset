@@ -15,9 +15,9 @@ MonoBehaviour:
   enemyName: CarnivorousPlant
   sprite: {fileID: 5566381870385903731, guid: 596e9748b0d512d449d35b23abd649c5, type: 3}
   exposedSprite: {fileID: 0}
-  maxHP: 28
+  maxHP: 24
   attack: 9
-  defense: 5
+  defense: 3
   maxHits: 1
   showsIntent: 1
   isBoss: 0
